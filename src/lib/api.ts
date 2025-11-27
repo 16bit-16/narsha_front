@@ -1,6 +1,7 @@
 export type ApiError = { error?: string; message?: string };
 
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://palpalshop.shop/api";
+
 
 // ✅ 하나의 통합된 api 함수
 export async function api<T = any>(
