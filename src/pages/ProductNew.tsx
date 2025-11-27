@@ -137,60 +137,61 @@ export default function ProductNew() {
     return data.urls as string[];
   }
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTouched({ title: true, price: true });
-    setErrMsg(null);
-    if (!title.trim() || price <= 0) {
-      setErrMsg("필수 항목을 확인해 주세요.");
-      return;
-    }
+  // pages/ProductNew.tsx - onSubmit 함수
 
-    setBusy(true);
-    try {
-      // ✅ 이미지 업로드도 api 함수 사용
-      const urls = await uploadImages(selFiles.map((s) => s.file));
+const onSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setTouched({ title: true, price: true });
+  setErrMsg(null);
+  if (!title.trim() || price <= 0) {
+    setErrMsg("필수 항목을 확인해 주세요.");
+    return;
+  }
 
-      // ✅ api 함수 사용
-      const data = await api<{ ok: true; product: any }>("/products", {
-        method: "POST",
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim(),
-          price,
-          category,
-          location: location.trim() || "미정",
-          images: urls,
-          lat: selectedLat,
-          lng: selectedLng,
-          brand: Brand,
-          quality: Quality,
-          buydate: BuyDate || "",
-          trade: Trade,
-          deliveryfee: DeliveryFee,
-        }),
-      });
+  setBusy(true);
+  try {
+    const urls = await uploadImages(selFiles.map((s) => s.file));
 
-      alert("상품이 등록되었습니다!");
-      navigate("/");
-      setTitle("");
-      setDescription("");
-      setPriceRaw("");
-      setCategory("기타");
-      setLocation("");
-      setSelFiles([]);
-      setTouched({});
-      setBrand("");
-      setQuality("");
-      setBuyDate("");
-      setTrade("");
-      setDeliveryFee("배송비 미포함");
-    } catch (e: any) {
-      setErrMsg(e.message || "문제가 발생했습니다.");
-    } finally {
-      setBusy(false);
-    }
-  };
+    // ✅ data 변수 제거 (사용 안 하니까)
+    await api<{ ok: true; product: any }>("/products", {
+      method: "POST",
+      body: JSON.stringify({
+        title: title.trim(),
+        description: description.trim(),
+        price,
+        category,
+        location: location.trim() || "미정",
+        images: urls,
+        lat: selectedLat,
+        lng: selectedLng,
+        brand: Brand,
+        quality: Quality,
+        buydate: BuyDate || "",
+        trade: Trade,
+        deliveryfee: DeliveryFee,
+      }),
+    });
+
+    alert("상품이 등록되었습니다!");
+    navigate("/");
+    setTitle("");
+    setDescription("");
+    setPriceRaw("");
+    setCategory("기타");
+    setLocation("");
+    setSelFiles([]);
+    setTouched({});
+    setBrand("");
+    setQuality("");
+    setBuyDate("");
+    setTrade("");
+    setDeliveryFee("배송비 미포함");
+  } catch (e: any) {
+    setErrMsg(e.message || "문제가 발생했습니다.");
+  } finally {
+    setBusy(false);
+  }
+};
 
   const titleError = touched.title && !title.trim();
   const priceError = touched.price && price <= 0;
