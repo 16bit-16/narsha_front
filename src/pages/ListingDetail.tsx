@@ -5,8 +5,7 @@ import DetailSidebar from "../components/DetailSidebar";
 import ProductSection from "../components/ProductSection";
 import Map from "../components/Map";
 import type { Product } from "../data/mockProducts";
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
+import { api } from "../utils/api";
 
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
@@ -30,24 +29,19 @@ export default function ListingDetail() {
       setLoading(true);
       setErr(null);
       try {
-        const pRes = await fetch(`${API_BASE}/products/${id}`, {
-          credentials: "include",
-        });
-        const pJson = await pRes.json();
-        if (!pRes.ok || pJson.ok === false)
-          throw new Error(pJson.error || "not_found");
+        // ✅ api 함수 사용
+        const pJson = await api<{ ok: true; product: Product; isLiked: boolean }>(
+          `/products/${id}`
+        );
         const item: Product = pJson.product;
 
         // ✅ 좋아요 정보 초기화
-        setIsLiked(pJson.isLiked || false); // 서버에서 현재 유저의 좋아요 여부
+        setIsLiked(pJson.isLiked || false);
         setLikeCount(item.likeCount || 0);
 
-        const lRes = await fetch(`${API_BASE}/products`, {
-          credentials: "include",
-        });
-        const lJson = await lRes.json();
-        const list: Product[] =
-          lRes.ok && lJson.ok !== false ? lJson.products : [];
+        // ✅ api 함수 사용
+        const lJson = await api<{ ok: true; products: Product[] }>("/products");
+        const list: Product[] = lJson.products || [];
 
         if (!alive) return;
         setProduct(item);
@@ -66,13 +60,6 @@ export default function ListingDetail() {
     };
   }, [id]);
 
-  const copy = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      alert("링크가 복사되었습니다!");
-    });
-  }
-
   // ✅ 좋아요 토글 함수
   const handleLike = async () => {
     if (!id || likeBusy) return;
@@ -86,7 +73,7 @@ export default function ListingDetail() {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
 
     try {
-      const res = await fetch(`${API_BASE}/products/${id}/like`, {
+      const res = await fetch(`${ api }/products/${id}/like`, {
         method: "POST",
         credentials: "include",
       });
@@ -196,7 +183,7 @@ export default function ListingDetail() {
             <button
               onClick={handleLike}
               disabled={likeBusy}
-              className={`text-2xl transition-colors ${
+              className={`px-3 py-2 text-lg transition-colors ${
                 isLiked
                   ? "text-red-500 hover:text-red-600"
                   : "text-gray-600 hover:text-red-500"
@@ -206,9 +193,7 @@ export default function ListingDetail() {
               {isLiked ? "♥" : "♡"}
             </button>
             
-            <button className="text-2xl text-gray-600 hover:bg-zinc-50"
-              onClick={copy}
-            >
+            <button className="px-3 py-2 text-lg text-gray-600 hover:bg-zinc-50">
               ↗
             </button>
             

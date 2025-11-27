@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Map from "../components/Map";
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
+import { api } from "../utils/api";
 
 type SelFile = { file: File; preview: string; id: string };
 
@@ -115,13 +115,22 @@ export default function ProductNew() {
 
   async function uploadImages(files: File[]): Promise<string[]> {
     if (!files.length) return [];
+    
+    const token = sessionStorage.getItem("token");
     const fd = new FormData();
     files.forEach((f) => fd.append("files", f));
+    
+    const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
     const res = await fetch(`${API_BASE}/uploads/images`, {
       method: "POST",
       credentials: "include",
+      headers: {
+        // ✅ Content-Type 제거! (FormData는 자동 설정)
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: fd,
     });
+    
     const data = await res.json();
     if (!res.ok || data.ok === false)
       throw new Error(data.error || "이미지 업로드 실패");
@@ -139,11 +148,12 @@ export default function ProductNew() {
 
     setBusy(true);
     try {
+      // ✅ 이미지 업로드도 api 함수 사용
       const urls = await uploadImages(selFiles.map((s) => s.file));
-      const res = await fetch(`${API_BASE}/products`, {
+
+      // ✅ api 함수 사용
+      const data = await api<{ ok: true; product: any }>("/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim(),
@@ -153,17 +163,13 @@ export default function ProductNew() {
           images: urls,
           lat: selectedLat,
           lng: selectedLng,
-        
-          brand: Brand.trim(),
-          quality: Quality || "미개봉",
-          buydate: BuyDate,
-          trade: Trade.trim(),
+          brand: Brand,
+          quality: Quality,
+          buydate: BuyDate || "",
+          trade: Trade,
           deliveryfee: DeliveryFee,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || data.ok === false)
-        throw new Error(data.error || "등록 실패");
 
       alert("상품이 등록되었습니다!");
       navigate("/");

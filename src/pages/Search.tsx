@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import type { Product } from "../data/mockProducts";
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
+import { api } from "../utils/api";
 
 export default function Search() {
     const [searchParams] = useSearchParams();
@@ -18,11 +17,10 @@ export default function Search() {
         async function search() {
             setLoading(true);
             try {
-                const res = await fetch(
-                    `${API_BASE}/products/search?q=${encodeURIComponent(query)}`,
-                    { credentials: "include" }
+                // ✅ api 함수 사용
+                const data = await api<{ ok: true; products: Product[] }>(
+                    `/products/search?q=${encodeURIComponent(query)}`
                 );
-                const data = await res.json();
                 setProducts(data.products || []);
             } catch (err) {
                 console.error("검색 실패:", err);

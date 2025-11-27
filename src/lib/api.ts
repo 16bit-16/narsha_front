@@ -1,55 +1,53 @@
 export type ApiError = { error?: string; message?: string };
 
-const BASE_URL = "http://localhost:4000"; // 서버 주소
-const API = import.meta.env.VITE_API_BASE || "/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 
+// ✅ 하나의 통합된 api 함수
 export async function api<T = any>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${API_BASE}${path}`, { 
+    ...options, 
+    headers,
+    credentials: "include",
+  });
+  
   const text = await res.text();
   const data = text ? JSON.parse(text) : {};
-  if (!res.ok) {
-    const msg =
-      (data as ApiError).error || (data as ApiError).message || res.statusText;
+  
+  if (!res.ok || data?.ok === false) {
+    const msg = data.error || data.message || res.statusText;
     throw new Error(msg);
   }
+  
   return data as T;
 }
 
+// ✅ 헬퍼 함수들 (api 함수 사용)
 async function post<T>(path: string, body: any): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+  return api<T>(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(body),
   });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data?.ok === false)
-    throw new Error(data?.error || `HTTP ${res.status}`);
-  return data as T;
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API}${path}`, { credentials: "include" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data?.ok === false)
-    throw new Error(data?.error || `HTTP ${res.status}`);
-  return data as T;
+  return api<T>(path, { method: "GET" });
 }
 
 export const AuthAPI = {
   login: (userId: string, password: string) =>
-    post<{ ok: true; user: any }>("/auth/login", { userId, password }),
+    post<{ ok: true; user: any; token: string }>("/auth/login", { userId, password }),
   me: () => get<{ ok: true; user: any }>("/auth/me"),
   logout: () => post<{ ok: true }>("/auth/logout", {}),
 };
+
 export { post, get };

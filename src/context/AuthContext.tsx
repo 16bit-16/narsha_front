@@ -1,32 +1,17 @@
-// ✅ 수정된 AuthContext.tsx
+// context/AuthContext.tsx
 
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { api } from "../utils/api";
 
-// ✅ User 타입에서 null 제거
 type User = { 
   id: string; 
   userId: string; 
   email: string;
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
-
-async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    ...init,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || (data as any)?.ok === false) {
-    throw new Error((data as any)?.error || `HTTP ${res.status}`);
-  }
-  return data as T;
-}
-
 type AuthContextValue = {
-  user: User | null; // ✅ 여기서 null 처리
+  user: User | null;
   loading: boolean;
   authBusy: boolean;
   login: (userId: string, password: string) => Promise<void>;
@@ -37,10 +22,11 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null); // ✅ 여기도 수정
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authBusy, setAuthBusy] = useState(false);
 
+  // 앱 시작 시 세션 복구
   useEffect(() => {
     (async () => {
       try {
@@ -48,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(me.user);
       } catch {
         setUser(null);
+        sessionStorage.removeItem("token"); // ✅ 만료된 토큰 제거
       } finally {
         setLoading(false);
       }
@@ -62,10 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (userId: string, password: string) => {
     setAuthBusy(true);
     try {
-      const res = await api<{ ok: true; user: User }>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ userId, password }),
-      });
+      const res = await api<{ ok: true; user: User; token: string }>(
+        "/auth/login",
+        {
+          method: "POST",
+          body: JSON.stringify({ userId, password }),
+        }
+      );
+      
+      sessionStorage.setItem("token", res.token); // ✅ 변경
       setUser(res.user);
     } finally {
       setAuthBusy(false);
@@ -76,6 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthBusy(true);
     try {
       await api<{ ok: true }>("/auth/logout", { method: "POST" });
+      
+      // ✅ localStorage에서 토큰 제거
+      sessionStorage.removeItem("token");
       setUser(null);
     } finally {
       setAuthBusy(false);
