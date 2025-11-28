@@ -125,11 +125,6 @@ export default function ListingDetail() {
               ✕
             </button>
 
-            <div className="mb-2 text-xs text-gray-500">
-              위치: {product.lat}, {product.lng}
-            </div>
-
-
             <Map
               onSelect={() => { }}
               center={{ lat: product.lat, lng: product.lng }}
