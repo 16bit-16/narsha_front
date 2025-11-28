@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthBusy(true);
     try {
       await api<{ ok: true }>("/auth/logout", { method: "POST" });
-      
+      alert("로그아웃되었습니다.");
       // ✅ localStorage에서 토큰 제거
       sessionStorage.removeItem("token");
       setUser(null);

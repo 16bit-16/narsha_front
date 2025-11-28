@@ -10,8 +10,10 @@ import ListingDetail from "./pages/ListingDetail";
 import ProductNew from "./pages/ProductNew";
 import User from "./pages/User";
 import Search from "./pages/Search";
+import FindId from "./pages/FindId";
+import FindPw from "./pages/FindPw";
 
-const HIDE_LAYOUT_PATHS = ["/login", "/signup"] as const;
+const HIDE_LAYOUT_PATHS = ["/login", "/signup","/find"] as const;
 console.log(import.meta.env.VITE_KAKAOMAP_KEY);
 
 // 특정 경로에서는 Header/Footer 숨기기
@@ -37,9 +39,10 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/sell" element={<ProductNew />} />
-            <Route path="/mypage/:userId" element={<User />} />
+            <Route path="/user" element={<User />} />
             <Route path="/search" element={<Search />} />
-
+            <Route path="/find/id" element={<FindId />} />
+            <Route path="/find/pw" element={<FindPw />} />
 
             {/* 인증 필요한 페이지 (예시) */}
             {/*

@@ -7,7 +7,7 @@ export default function Header() {
   const navigate = useNavigate();
   const { user, loading, logout } = useAuth();
   const [searchParams] = useSearchParams();
-  
+
   // ✅ URL에서 현재 검색어 가져오기
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("q") || ""
@@ -21,11 +21,17 @@ export default function Header() {
     }
   };
 
+  const [isVisible, setIsVisible] = useState(false);
+
+  const mydetail = () => {
+    setIsVisible(!isVisible);
+  }
+
   // ✅ 검색 실행
   const handleSearch = () => {
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
-    
+
     // 검색 페이지로 이동 (쿼리 파라미터 포함)
     navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
@@ -49,58 +55,66 @@ export default function Header() {
         </button>
 
         {/* ✅ 검색창 */}
-        <div className="flex flex-1 max-w-xl gap-2 ml-6">
+        <div className="flex flex-1 max-w-xl ml-6 rounded-md bg-[#efefef] px-4">
+          <div className="flex items-center justify-center">
+            <img src="/search.svg" alt="" className="w-3 h-3 opacity-40" />
+          </div>
           <input
             type="text"
             placeholder="검색어를 입력해주세요"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 px-4 py-2 text-sm rounded-md bg-[#efefef] placeholder-neutral-500 focus:ring-2 focus:ring-neutral-800 focus:outline-none"
+            className="flex-1 pl-2 pr-4 py-2 text-sm bg-[#efefef] placeholder-neutral-500 focus:ring-2 focus:ring-neutral-800 focus:outline-none"
           />
-          <button
-            onClick={handleSearch}
-            className="px-4 py-2 text-sm font-semibold text-white rounded-md bg-neutral-800 hover:opacity-90"
-          >
-            검색
-          </button>
         </div>
 
         {/* 우측 메뉴 */}
         <div className="flex items-center gap-2 ml-auto">
+
           <button
             onClick={goSell}
-            className="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-neutral-900 hover:opacity-90"
-            title={user ? "상품 등록하기" : "로그인하고 상품 등록하기"}
+            className="flex items-center justify-center pr-2 text-md"
+            title={user ? "상품 판매하기" : "로그인하고 상품 판매하기"}
           >
-            등록하기
+            <div className="relative">
+              <img src="https://cdn-icons-png.flaticon.com/512/3737/3737822.png" alt="" className="w-4 h-4" />
+            </div>
+            <p className="pl-1">판매하기</p>
           </button>
-
+          <div className="w-[1px] h-4 bg-gray-800"></div>
           {loading ? (
             <span className="text-sm text-gray-500">확인 중...</span>
           ) : user ? (
             <>
-              <span className="text-sm text-gray-700">{user.userId} 님</span>
-              <button
-                onClick={logout}
-                className="px-3 py-1 text-sm text-white rounded bg-neutral-900 hover:opacity-90"
+              <div
+                onClick={() => mydetail()} //
+                className="flex items-center justify-center px-2 hover:cursor-pointer text-md"
               >
-                로그아웃
-              </button>
+                <div className="relative">
+                  <img src="https://cdn-icons-png.flaticon.com/512/456/456283.png" alt="" className="w-4 h-4" />
+                </div>
+                <p className="pl-1">마이</p>
+                <div id="mybtn_detail" className="absolute flex-col hidden gap-2 p-4 text-sm bg-white border rounded-lg top-16" style={{ display: isVisible ? "flex" : "none" }}>
+                  <button onClick={() => navigate("/user")}>마이페이지</button>
+                  <hr />
+                  <button 
+                    onClick={logout}
+                    className="text-red-500"
+                  >로그아웃</button>
+                </div>
+              </div>
             </>
           ) : (
             <>
               <button
                 onClick={() => navigate("/login")}
-                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100"
+                className="flex items-center justify-center px-2 text-md"
               >
-                로그인
-              </button>
-              <button
-                onClick={() => navigate("/signup")}
-                className="px-3 py-1 text-sm text-white rounded bg-neutral-900 hover:opacity-90"
-              >
-                회원가입
+                <div className="relative">
+                  <img src="https://cdn-icons-png.flaticon.com/512/456/456283.png" alt="" className="w-4 h-4" />
+                </div>
+                <p className="pl-1">마이</p>
               </button>
             </>
           )}
@@ -119,10 +133,9 @@ export default function Header() {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `hover:text-neutral-900 ${
-                isActive
-                  ? "text-neutral-900 font-bold underline underline-offset-8 decoration-2"
-                  : ""
+              `hover:text-neutral-900 ${isActive
+                ? "text-neutral-900 font-bold underline underline-offset-8 decoration-2"
+                : ""
               }`
             }
           >

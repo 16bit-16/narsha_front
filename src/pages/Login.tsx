@@ -38,7 +38,7 @@ export default function Login() {
   return (
     <>
       <div className="flex justify-between h-screen md:bg-[#fcfcfc] bg-zinc-400">
-        {/* 오른쪽 폼 영역 */}
+        {/* 왼쪽 폼 영역 */}
         <div className="flex flex-col justify-center items-center bg-[#fcfcfc] md:w-[30%] w-[100%] mx-[auto]">
           <a href="/" className="w-48">
             <img src="/logo_black.png" alt="" />
@@ -97,11 +97,11 @@ export default function Login() {
             {/* 하단 링크 */}
             <div className="flex items-center justify-between text-xs text-zinc-500">
               <div className="space-x-2">
-                <Link to="#" className="">
+                <Link to="/find/pw" className="underline underline-offset-2">
                   비밀번호 찾기
                 </Link>
                 <span className="opacity-60">|</span>
-                <Link to="#" className="underline underline-offset-2">
+                <Link to="/find/id" className="underline underline-offset-2">
                   아이디 찾기
                 </Link>
               </div>
