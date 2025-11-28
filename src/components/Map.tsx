@@ -1,5 +1,7 @@
+// components/Map.tsx
+
 import { useEffect, useState } from "react";
-import { Map, MapMarker, useKakaoLoader } from "react-kakao-maps-sdk";
+import { Map as KakaoMap, MapMarker, useKakaoLoader } from "react-kakao-maps-sdk";
 
 interface MapSelectInfo {
     lat: number;
@@ -11,71 +13,85 @@ interface KakaoMapProps {
     onSelect: (info: MapSelectInfo) => void;
     center?: { lat: number; lng: number };
     marker?: { lat: number; lng: number };
+    readOnly?: boolean; // ✅ 읽기 전용 모드 추가
 }
 
-export default function KakaoMap({ onSelect }: KakaoMapProps) {
+export default function Map({ 
+    onSelect, 
+    center: propCenter, 
+    marker: propMarker,
+    readOnly = false // ✅ 기본값 false
+}: KakaoMapProps) {
     const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
-    const [center, setCenter] = useState({ lat: 37.5665, lng: 126.9780 });
+    const [center, setCenter] = useState({ lat: 35.8714, lng: 128.6014 });
     const [loaded, setLoaded] = useState(false);
 
-    // Kakao SDK 로드
-    useKakaoLoader({
+    const [loading, error] = useKakaoLoader({
         appkey: import.meta.env.VITE_KAKAOMAP_KEY!,
         libraries: ["services"],
     });
 
-    // kakao 객체 polling
     useEffect(() => {
-        const timer = setInterval(() => {
-            if (window.kakao && window.kakao.maps) {
-                setLoaded(true);
-                clearInterval(timer);
-            }
-        }, 100);
+        if (!loading && !error) {
+            setLoaded(true);
+        }
+    }, [loading, error]);
 
-        return () => clearInterval(timer);
-    }, []);
-
-    // 📌 현재 위치 가져와서 마커 찍기
+    // ✅ props 처리 개선
     useEffect(() => {
-        if (!loaded) return;
+        if (propCenter) {
+            setCenter(propCenter);
+        }
+        if (propMarker) {
+            setMarker(propMarker);
+        }
+    }, [propCenter, propMarker]);
+
+    // 현재 위치 가져오기 (편집 모드 + props 없을 때만)
+    useEffect(() => {
+        if (!loaded || readOnly) return;
+        if (propCenter || propMarker) return;
         if (!navigator.geolocation) return;
     
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
-    
-                // 지도 중심만 내 위치로 이동
                 setCenter({ lat, lng });
-    
-                // ⚠️ 여기서 onSelect 호출 제거
-                // setMarker({ lat, lng });
             },
-            () => {
-                console.warn("현재 위치를 가져올 수 없음.");
+            (err) => {
+                console.warn("현재 위치를 가져올 수 없음");
             }
         );
-    }, [loaded]);    
+    }, [loaded, readOnly, propCenter, propMarker]);    
 
-    // 지도 클릭 시 핀 이동 + 주소 갱신
     const handleClick = (_t: any, mouseEvent: kakao.maps.event.MouseEvent) => {
+        // ✅ 읽기 전용 모드면 클릭 무시
+        if (readOnly) return;
+
         const lat = mouseEvent.latLng.getLat();
         const lng = mouseEvent.latLng.getLng();
-        setMarker({ lat, lng }); // 클릭한 위치 마커만 표시
+        setMarker({ lat, lng });
     
         const geocoder = new window.kakao.maps.services.Geocoder();
         geocoder.coord2Address(lng, lat, (result, status) => {
             if (status === window.kakao.maps.services.Status.OK) {
                 const addr = result[0].address;
                 const address = `${addr.region_1depth_name} ${addr.region_2depth_name} ${addr.region_3depth_name}`;
-                onSelect({ lat, lng, address }); // 클릭한 위치 정보 전달
+                onSelect({ lat, lng, address });
             }
         });
     };
-    
 
-    if (!loaded) {
+    if (error) {
+        return (
+            <div className="flex items-center justify-center text-red-500 h-96">
+                지도를 불러올 수 없습니다: {error.message}
+            </div>
+        );
+    }
+
+    if (loading || !loaded) {
         return (
             <div className="flex items-center justify-center h-96">
                 지도를 불러오는 중...
@@ -83,13 +99,23 @@ export default function KakaoMap({ onSelect }: KakaoMapProps) {
         );
     }
 
+    // ✅ 표시할 마커 결정
+    const displayMarker = propMarker || marker;
+
     return (
-        <Map
+        <KakaoMap
             center={center}
             onClick={handleClick}
             className="w-full border rounded-md h-96"
+            level={3}
+            draggable={true}
+            zoomable={true}
         >
-            {marker && <MapMarker position={marker} />}
-        </Map>
+            {displayMarker && (
+                <MapMarker 
+                    position={displayMarker}
+                />
+            )}
+        </KakaoMap>
     );
 }

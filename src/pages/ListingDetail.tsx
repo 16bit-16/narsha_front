@@ -15,7 +15,7 @@ export default function ListingDetail() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
-  
+
   // ✅ 좋아요 상태 관리
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -63,9 +63,9 @@ export default function ListingDetail() {
   // ✅ 좋아요 토글 함수
   const handleLike = async () => {
     if (!id || likeBusy) return;
-    
+
     setLikeBusy(true);
-    
+
     // 낙관적 업데이트 (즉시 UI 반영)
     const prevLiked = isLiked;
     const prevCount = likeCount;
@@ -73,15 +73,14 @@ export default function ListingDetail() {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
 
     try {
-      const res = await fetch(`${ api }/products/${id}/like`, {
+      // ✅ api 함수 사용
+      const data = await api<{
+        ok: true;
+        isLiked: boolean;
+        likeCount: number
+      }>(`/products/${id}/like`, {
         method: "POST",
-        credentials: "include",
       });
-      const data = await res.json();
-      
-      if (!res.ok || data.ok === false) {
-        throw new Error(data.error || "좋아요 처리 실패");
-      }
 
       // 서버 응답으로 최종 확정
       setIsLiked(data.isLiked);
@@ -126,8 +125,13 @@ export default function ListingDetail() {
               ✕
             </button>
 
+            <div className="mb-2 text-xs text-gray-500">
+              위치: {product.lat}, {product.lng}
+            </div>
+
+
             <Map
-              onSelect={() => {}}
+              onSelect={() => { }}
               center={{ lat: product.lat, lng: product.lng }}
               marker={{ lat: product.lat, lng: product.lng }}
             />
@@ -149,7 +153,7 @@ export default function ListingDetail() {
                 <div className="text-sm font-semibold">
                   사용자 {product.seller?.slice?.(0, 6) ?? "알수없음"}
                 </div>
-                <div className="text-xs cursor-pointer text-zinc-500 hover:underline">
+                <div className="text-xs text-zinc-500">
                   {product.location || "지역 정보 없음"}
                 </div>
               </div>
@@ -183,24 +187,23 @@ export default function ListingDetail() {
             <button
               onClick={handleLike}
               disabled={likeBusy}
-              className={`px-3 py-2 text-lg transition-colors ${
-                isLiked
-                  ? "text-red-500 hover:text-red-600"
-                  : "text-gray-600 hover:text-red-500"
-              } ${likeBusy ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`px-3 py-2 text-lg transition-colors ${isLiked
+                ? "text-red-500 hover:text-red-600"
+                : "text-gray-600 hover:text-red-500"
+                } ${likeBusy ? "opacity-50 cursor-not-allowed" : ""}`}
               title={`좋아요 ${likeCount}개`}
             >
               {isLiked ? "♥" : "♡"}
             </button>
-            
+
             <button className="px-3 py-2 text-lg text-gray-600 hover:bg-zinc-50">
               ↗
             </button>
-            
+
             <button className="h-10 px-16 ml-auto text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50">
               채팅하기
             </button>
-            
+
             <button className="h-10 px-16 text-sm font-semibold text-white bg-gray-800 rounded hover:opacity-90">
               구매하기
             </button>
