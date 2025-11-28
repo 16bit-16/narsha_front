@@ -60,7 +60,7 @@ export default function Map({
                 setCenter({ lat, lng });
             },
             (err) => {
-                console.warn("현재 위치를 가져올 수 없음");
+                console.warn("현재 위치를 가져올 수 없음"), err.message;
             }
         );
     }, [loaded, readOnly, propCenter, propMarker]);    
