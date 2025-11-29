@@ -65,7 +65,7 @@ export default function Map({
         );
     }, [loaded, readOnly, propCenter, propMarker]);    
 
-    const handleClick = (_t: any, mouseEvent: kakao.maps.event.MouseEvent) => {
+    const handleClick = (_t: any, mouseEvent: kakao.maps.event.MouseEvent) => {''
         // ✅ 읽기 전용 모드면 클릭 무시
         if (readOnly) return;
 
