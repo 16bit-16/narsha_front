@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { unstable_setDevServerHooks, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Map from "../components/Map";
 
 import { api } from "../utils/api";
