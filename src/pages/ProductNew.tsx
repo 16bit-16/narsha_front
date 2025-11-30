@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { unstable_setDevServerHooks, useNavigate } from "react-router-dom";
 import Map from "../components/Map";
 
 import { api } from "../utils/api";
@@ -162,10 +162,10 @@ const onSubmit = async (e: React.FormEvent) => {
         category,
         location: location.trim() || "미정",
         images: urls,
-        lat: selectedLat,
-        lng: selectedLng,
+        lat: selectedLat ?? undefined,
+        lng: selectedLng ?? undefined,
         brand: Brand,
-        quality: Quality,
+        quality: Quality || "중",
         buydate: BuyDate || "",
         trade: Trade,
         deliveryfee: DeliveryFee,
