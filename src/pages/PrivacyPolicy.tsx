@@ -1,4 +1,10 @@
+import { useEffect } from "react";
+
 export default function PrivacyPolicy() {
+    useEffect(() => {
+            window.scrollTo(0, 0);  // 페이지 맨 위로 스크롤
+        }, []);
+        
     return (
         <>
             <h1 className="c1">PALPAL 개인정보 처리방침</h1>

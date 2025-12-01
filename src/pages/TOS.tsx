@@ -1,10 +1,16 @@
+import { useEffect } from "react";
+
 export default function TOS() {
-    return(
+    useEffect(() => {
+        window.scrollTo(0, 0);  // 페이지 맨 위로 스크롤
+    }, []);
+    
+    return (
         <>
             <div className="py-4">
                 <h1 className="c1">PALPAL 이용약관</h1>
                 <p>시행일: 2025년 1월 1일</p>
-                <hr className="mt-2"/>
+                <hr className="mt-2" />
                 <h3 className="c2">제1조 (목적)</h3>
                 <p>본 약관은 PALPAL(이하 "회사")가 운영하는 중고거래 플랫폼 서비스(이하 "서비스")의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
                 <h3 className="c2">제2조 (정의)</h3>
@@ -108,7 +114,7 @@ export default function TOS() {
                     <li>회사와 이용자 간에 발생한 전자상거래 분쟁에 관한 소송은 제소 당시의 이용자의 주소에 의하고, 주소가 없는 경우에는 거소를 관할하는 지방법원의 전속관할로 합니다.</li>
                     <li>회사와 이용자 간에 제기된 전자상거래 소송에는 대한민국법을 적용합니다.</li>
                 </ul>
-                <hr className="my-4"/>
+                <hr className="my-4" />
                 <p>부칙 | 본 약관은 2025년 1월 1일부터 시행합니다.</p>
             </div>
         </>
