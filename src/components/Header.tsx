@@ -65,7 +65,7 @@ export default function Header() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 pl-2 pr-4 py-2 text-sm bg-[#efefef] placeholder-neutral-500"
+            className="flex-1 pl-2 pr-4 py-2 text-sm bg-[#efefef] placeholder-neutral-500 focus:outline-none"
           />
         </div>
 
@@ -74,7 +74,7 @@ export default function Header() {
 
           <button
             onClick={goSell}
-            className="flex items-center justify-center pr-2 text-md"
+            className="flex items-center justify-center pr-2 duration-150 text-md hover:font-semibold"
             title={user ? "상품 판매하기" : "로그인하고 상품 판매하기"}
           >
             <div className="relative">
@@ -89,7 +89,7 @@ export default function Header() {
             <>
               <div
                 onClick={() => mydetail()} //
-                className="flex items-center justify-center px-2 hover:cursor-pointer text-md"
+                className="flex items-center justify-center px-2 duration-150 hover:cursor-pointer hover:font-semibold text-md"
               >
                 <div className="relative">
                   <img src="https://cdn-icons-png.flaticon.com/512/456/456283.png" alt="" className="w-4 h-4" />

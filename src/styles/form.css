@@ -63,3 +63,12 @@
 .alert-err {
   @apply p-3 mb-4 text-sm text-red-800 bg-red-50 rounded-lg;
 }
+.c1 {
+  @apply text-2xl font-bold py-3
+}
+.c2 {
+  @apply text-xl font-semibold pt-4
+}
+.u {
+  @apply pl-8
+}
