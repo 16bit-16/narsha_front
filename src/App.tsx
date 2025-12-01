@@ -45,8 +45,8 @@ export default function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/find/id" element={<FindId />} />
             <Route path="/find/pw" element={<FindPw />} />
-            <Route path="/tos" element={<Tos/>} />
-            <Route path="/privacy" element={<Privacy/>} />
+            <Route path="/tos" element={<Tos />} />
+            <Route path="/privacy" element={<Privacy />} />
 
             {/* 인증 필요한 페이지 (예시) */}
             {/*

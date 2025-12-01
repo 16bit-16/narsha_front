@@ -1,11 +1,14 @@
+import { useNavigate } from "react-router-dom";
+
 export default function Footer() {
+  const navigate = useNavigate();
   return (
     <footer className="mt-12 border-t bg-gray-50">
       <div className="container flex flex-col gap-2 py-6 text-sm text-gray-600">
         <div className="flex flex-wrap gap-4 text-sm">
-          <a href="" className="duration-150 hover:font-bold hover:text-black">회사소개</a>
-          <a href="/tos" className="duration-150 hover:font-bold hover:text-black">이용약관</a>
-          <a href="/privacy" className="duration-150 hover:font-bold hover:text-black">개인정보처리방침</a>
+          <button onClick={() => {navigate("/")}} className="duration-150 hover:font-bold hover:text-black">회사소개</button>
+          <button onClick={() => {navigate("/tos")}} className="duration-150 hover:font-bold hover:text-black">이용약관</button>
+          <button onClick={() => {navigate("/privacy")}} className="duration-150 hover:font-bold hover:text-black">개인정보처리방침</button>
         </div>
 
         <div className="pt-4 text-xs">
