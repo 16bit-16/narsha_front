@@ -65,7 +65,7 @@ export default function Header() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 pl-2 pr-4 py-2 text-sm bg-[#efefef] placeholder-neutral-500 focus:ring-2 focus:ring-neutral-800 focus:outline-none"
+            className="flex-1 pl-2 pr-4 py-2 text-sm bg-[#efefef] placeholder-neutral-500"
           />
         </div>
 

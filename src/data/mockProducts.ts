@@ -20,6 +20,7 @@ export interface Product {
   buydate: string;
   trade: string;
   deliveryfee: string;
+  isSailed: boolean;
   likes?: string[]; // 좋아요한 유저 ID 배열
   likeCount?: number; // 좋아요 수
 }

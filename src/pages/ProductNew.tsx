@@ -49,6 +49,7 @@ export default function ProductNew() {
   const [BuyDate, setBuyDate] = useState<string>("");
   const [Trade, setTrade] = useState<string>("");
   const [DeliveryFee, setDeliveryFee] = useState("배송비 미포함");
+  const [IsSailed, setIsSailed] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
@@ -169,6 +170,7 @@ const onSubmit = async (e: React.FormEvent) => {
         buydate: BuyDate || "",
         trade: Trade,
         deliveryfee: DeliveryFee,
+        isSailed: IsSailed, 
       }),
     });
 
@@ -186,6 +188,7 @@ const onSubmit = async (e: React.FormEvent) => {
     setBuyDate("");
     setTrade("");
     setDeliveryFee("배송비 미포함");
+    setIsSailed(false);
   } catch (e: any) {
     setErrMsg(e.message || "문제가 발생했습니다.");
   } finally {
