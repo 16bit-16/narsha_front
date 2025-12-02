@@ -8,6 +8,7 @@ type User = {
   id: string; 
   userId: string; 
   email: string;
+  profileImage: string;
 };
 
 type AuthContextValue = {

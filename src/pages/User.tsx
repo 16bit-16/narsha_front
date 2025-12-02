@@ -16,6 +16,10 @@ export default function MyPage() {
     const [likedProducts, setLikedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // ✅ 설정 메뉴 상태
+    const [showMenu, setShowMenu] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
     useEffect(() => {
         if (!authLoading && !user) {
             navigate("/login");
@@ -54,11 +58,113 @@ export default function MyPage() {
         );
     }
 
+    const handleStatusChange = async (status: "selling" | "sold") => {
+        if (!selectedProduct) return;
+
+        try {
+            await api(`/products/${selectedProduct._id}/status`, {
+                method: "PATCH",
+                body: JSON.stringify({ status }),
+            });
+
+            // 상품 목록 갱신
+            await loadData();
+            setShowMenu(false);
+            setSelectedProduct(null);
+            alert(status === "sold" ? "판매완료 처리되었습니다" : "판매중으로 변경되었습니다");
+        } catch (err) {
+            alert("상태 변경에 실패했습니다");
+        }
+    };
+
+    // ✅ 상품 삭제
+    const handleDelete = async () => {
+        if (!selectedProduct) return;
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+
+        try {
+            await api(`/products/${selectedProduct._id}`, {
+                method: "DELETE",
+            });
+
+            await loadData();
+            setShowMenu(false);
+            setSelectedProduct(null);
+            alert("삭제되었습니다");
+        } catch (err) {
+            alert("삭제에 실패했습니다");
+        }
+    };
+
     const sellingProducts = myProducts.filter(p => p.status === "selling");
     const soldProducts = myProducts.filter(p => p.status === "sold");
 
     return (
         <div className="w-full ">
+            {/* 설정 모달 */}
+            {showMenu && selectedProduct && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                    onClick={() => setShowMenu(false)}
+                >
+                    <div
+                        className="overflow-hidden bg-white shadow-xl rounded-2xl w-80"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-4 border-b">
+                            <h3 className="font-semibold text-gray-900">{selectedProduct.title}</h3>
+                        </div>
+
+                        <div className="p-2">
+                            <button
+                                onClick={() => navigate(`/listing/${selectedProduct._id}`)}
+                                className="w-full px-4 py-3 text-left transition-colors rounded-lg hover:bg-gray-50"
+                            >
+                                상품 보기
+                            </button>
+
+                            <button
+                                onClick={() => navigate(`/edit/${selectedProduct._id}`)}
+                                className="w-full px-4 py-3 text-left transition-colors rounded-lg hover:bg-gray-50"
+                            >
+                                수정하기
+                            </button>
+
+                            {selectedProduct.status === "selling" ? (
+                                <button
+                                    onClick={() => handleStatusChange("sold")}
+                                    className="w-full px-4 py-3 text-left transition-colors rounded-lg hover:bg-gray-50"
+                                >
+                                    판매완료 처리
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleStatusChange("selling")}
+                                    className="w-full px-4 py-3 text-left transition-colors rounded-lg hover:bg-gray-50"
+                                >
+                                    판매중으로 변경
+                                </button>
+                            )}
+
+                            <button
+                                onClick={handleDelete}
+                                className="w-full px-4 py-3 text-left text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                            >
+                                삭제하기
+                            </button>
+                        </div>
+
+                        <div className="p-3 border-t">
+                            <button
+                                onClick={() => setShowMenu(false)}
+                                className="w-full py-2 text-gray-600 hover:text-gray-900"
+                            >
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="py-4 space-y-4">
                 {/* 프로필 카드 */}
                 <div className="p-8 bg-white border shadow-sm rounded-2xl">
@@ -81,7 +187,7 @@ export default function MyPage() {
                         {/* 버튼 */}
                         <div className="flex">
                             <button
-                                onClick={() => alert("프로필 편집 기능 준비중")}
+                                onClick={() => {navigate("/editprofile")}}
                                 className="px-6 py-2.5 text-sm font-semibold border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                             >
                                 프로필 수정
@@ -163,7 +269,23 @@ export default function MyPage() {
                                     ) : (
                                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                                             {sellingProducts.map((product) => (
-                                                <ProductCard key={product._id} item={product} />
+                                                <div key={product._id} className="relative group">
+                                                    <ProductCard item={product} />
+
+                                                    {/* 설정 버튼 */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedProduct(product);
+                                                            setShowMenu(true);
+                                                        }}
+                                                        className="absolute right-0 p-2 bottom-12"
+                                                    >
+                                                        <svg className="w-5 h-5 text-gray-800 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             ))}
                                         </div>
                                     )}
@@ -182,8 +304,8 @@ export default function MyPage() {
                                             {soldProducts.map((product) => (
                                                 <div key={product._id} className="relative">
                                                     <ProductCard item={product} />
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
-                                                        <span className="px-4 py-2 text-sm font-bold text-white bg-gray-900 rounded-lg">
+                                                    <div className="absolute inset-0 flex items-center justify-center h-64 bg-black/30 rounded-xl">
+                                                        <span className="px-4 py-2 text-2xl font-semibold text-white rounded-lg">
                                                             판매완료
                                                         </span>
                                                     </div>
