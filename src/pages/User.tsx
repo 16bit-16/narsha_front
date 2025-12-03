@@ -264,7 +264,7 @@ export default function MyPage() {
                                                 상품 등록하기
                                             </button>
                                         </div>
-                                    ) : 
+                                    ) : (
                                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                                             {sellingProducts.map((product) => (
                                                 <div key={product._id} className="relative group">
