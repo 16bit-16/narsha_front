@@ -1,18 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../utils/api";
 
 export default function EditProfile() {
     const navigate = useNavigate();
     const { user, loading: authLoading, refresh } = useAuth();
 
-    const [newUserId, setNewUserId] = useState(user?.userId || "");
-    const [profileImage, setProfileImage] = useState<string>(user?.profileImage || "");
-    const [previewUrl, setPreviewUrl] = useState<string>(user?.profileImage || "");
+    const [newNickname, setNewNickname] = useState("");
+    const [profileImage, setProfileImage] = useState<string>("");
+    const [previewUrl, setPreviewUrl] = useState<string>("");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+
+    // ✅ user가 로드되면 상태 초기화
+    useEffect(() => {
+        if (user) {
+            setNewNickname(user.nickname || "");
+            setProfileImage(user.profileImage || "");
+            setPreviewUrl(user.profileImage || "");
+        }
+    }, [user]);
 
     if (authLoading) {
         return <div className="container py-10 text-center"><p>확인 중...</p></div>;
@@ -25,12 +35,12 @@ export default function EditProfile() {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
+        if (file && file.type.startsWith("image/")) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const base64 = e.target?.result as string;
-                setProfileImage(base64);
-                setPreviewUrl(base64);
+            reader.onload = (event) => {
+                const base64String = event.target?.result as string;
+                setProfileImage(base64String);
+                setPreviewUrl(base64String);
             };
             reader.readAsDataURL(file);
         }
@@ -43,31 +53,37 @@ export default function EditProfile() {
         setSuccess(false);
 
         try {
-            const token = sessionStorage.getItem("token");
-
-            const response = await fetch("/api/users/profile", {
-                method: "PATCH",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    userId: newUserId !== user.userId ? newUserId : undefined,
-                    profileImage: profileImage !== user?.profileImage ? profileImage : undefined,
-                }),
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || "프로필 수정 실패");
+            const body: any = {};
+            
+            if (newNickname !== user.nickname) {
+                body.nickname = newNickname;
+            }
+            
+            if (profileImage !== user.profileImage) {
+                body.profileImage = profileImage;
             }
 
-            await refresh();
-            setSuccess(true);
-            setTimeout(() => {
-                navigate("/user");
-            }, 1500);
+            // 변경사항이 없으면 조기 반환
+            if (Object.keys(body).length === 0) {
+                setError("변경할 내용이 없습니다");
+                setLoading(false);
+                return;
+            }
+
+            // ✅ data 사용
+            const data = await api<{ ok: true; user: any }>("/users/profile", {
+                method: "PATCH",
+                body: JSON.stringify(body),
+            });
+
+            // ✅ 성공하면 사용자 정보 갱신
+            if (data.ok) {
+                await refresh();
+                setSuccess(true);
+                setTimeout(() => {
+                    navigate("/user");
+                }, 1500);
+            }
         } catch (err: any) {
             setError(err.message || "프로필 수정에 실패했습니다.");
         } finally {
@@ -75,7 +91,11 @@ export default function EditProfile() {
         }
     };
 
-    const avatarLetter = newUserId.charAt(0).toUpperCase();
+    // ✅ 안전한 아바타 문자 추출
+    const getAvatarLetter = () => {
+        const nick = newNickname || user?.nickname || "";
+        return nick.charAt(0).toUpperCase() || "U";
+    };
 
     return (
         <div className="max-w-2xl px-4 py-12 mx-auto">
@@ -97,7 +117,7 @@ export default function EditProfile() {
                             />
                         ) : (
                             <div className="flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-green-600">
-                                <span className="text-2xl font-bold text-white">{avatarLetter}</span>
+                                <span className="text-2xl font-bold text-white">{getAvatarLetter()}</span>
                             </div>
                         )}
 
@@ -106,49 +126,71 @@ export default function EditProfile() {
                                 type="file"
                                 accept="image/*"
                                 onChange={handleImageChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800"
                             />
+                            <p className="mt-2 text-xs text-gray-500">JPG, PNG 형식</p>
                         </div>
                     </div>
                 </div>
 
-                {/* 아이디 */}
+                {/* 아이디 (읽기 전용) */}
                 <div>
                     <label className="block mb-2 text-sm font-semibold text-gray-700">
-                        아이디
+                        아이디 (변경 불가)
                     </label>
                     <input
                         type="text"
-                        value={newUserId}
-                        onChange={(e) => setNewUserId(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        value={user.userId}
+                        disabled
+                        className="w-full px-4 py-2 text-gray-500 border border-gray-300 rounded-lg cursor-not-allowed bg-gray-50"
                     />
+                    <p className="mt-1 text-xs text-gray-500">아이디는 변경할 수 없습니다</p>
                 </div>
 
+                {/* 닉네임 */}
+                <div>
+                    <label className="block mb-2 text-sm font-semibold text-gray-700">
+                        닉네임
+                    </label>
+                    <input
+                        type="text"
+                        value={newNickname}
+                        onChange={(e) => setNewNickname(e.target.value)}
+                        placeholder="닉네임을 입력하세요"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                        {newNickname === user.nickname ? "변경 없음" : "새로운 닉네임으로 변경됩니다"}
+                    </p>
+                </div>
+
+                {/* 에러 메시지 */}
                 {error && (
                     <div className="p-4 border border-red-200 rounded-lg bg-red-50">
                         <p className="text-sm text-red-600">{error}</p>
                     </div>
                 )}
 
+                {/* 성공 메시지 */}
                 {success && (
                     <div className="p-4 border border-green-200 rounded-lg bg-green-50">
                         <p className="text-sm text-green-600">프로필이 수정되었습니다!</p>
                     </div>
                 )}
 
+                {/* 버튼 */}
                 <div className="flex gap-3 pt-6">
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="flex-1 py-3 text-sm font-semibold text-white bg-gray-800 rounded-lg disabled:opacity-50"
+                        disabled={loading || (newNickname === user.nickname && profileImage === user.profileImage)}
+                        className="flex-1 py-3 text-sm font-semibold text-white transition-all bg-gray-800 rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? "저장 중..." : "저장하기"}
                     </button>
                     <button
                         type="button"
                         onClick={() => navigate("/user")}
-                        className="flex-1 py-3 text-sm font-semibold border border-gray-300 rounded-lg hover:bg-gray-50"
+                        className="flex-1 py-3 text-sm font-semibold transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
                         취소
                     </button>

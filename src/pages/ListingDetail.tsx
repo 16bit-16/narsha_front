@@ -157,7 +157,7 @@ export default function ListingDetail() {
                 <div className="bg-gray-800 rounded-full size-10" />
                 <div>
                   <div className="text-sm font-semibold">
-                    사용자 {product.seller?.slice?.(0, 6) ?? "알수없음"}
+                    {product.seller?.nickname || "알수없음"}
                   </div>
                   <div className="text-xs text-zinc-500">
                     {product.location || "지역 정보 없음"}

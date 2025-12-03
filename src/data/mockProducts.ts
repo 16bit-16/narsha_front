@@ -11,8 +11,15 @@ export interface Product {
   images: string[];
   status: "selling" | "reserved" | "sold";
   createdAt: string;
-  updatedAt: string;
-  seller: string;
+
+  seller: {
+    _id: string;
+    userId: string;
+    nickname: string;
+    profileImage?: string;
+    rating?: number;
+  };
+
   lat?: number;
   lng?: number;
   brand: string;

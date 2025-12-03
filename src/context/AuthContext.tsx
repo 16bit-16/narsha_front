@@ -6,6 +6,7 @@ import { api } from "../utils/api";
 
 type User = { 
   id: string; 
+  nickname: string;
   userId: string; 
   email: string;
   profileImage: string;

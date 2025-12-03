@@ -172,14 +172,12 @@ export default function MyPage() {
                         <div className="flex items-center gap-6">
                             {/* 프로필 이미지 */}
                             <div className="flex items-center justify-center rounded-full shadow-md bg-gradient-to-br from-green-400 to-green-600 size-24">
-                                <span className="text-3xl font-bold text-white">
-                                    {user.userId.charAt(0).toUpperCase()}
-                                </span>
+                                <img src={user.profileImage} alt="" />
                             </div>
 
                             {/* 사용자 정보 */}
                             <div>
-                                <h1 className="mb-2 text-2xl font-bold text-gray-900">{user.userId}</h1>
+                                <h1 className="mb-2 text-2xl font-bold text-gray-900">{user.nickname}</h1>
                                 <p className="text-sm text-gray-600">{user.email}</p>
                             </div>
                         </div>
@@ -218,7 +216,7 @@ export default function MyPage() {
                         <button
                             onClick={() => setActiveTab("selling")}
                             className={`flex-1 px-4 py-3 text-sm font-semibold rounded-md transition-all ${activeTab === "selling"
-                                ? "bg-gray-900 text-white"
+                                ? "bg-gray-800 text-white"
                                 : "text-gray-600 hover:bg-gray-50"
                                 }`}
                         >
@@ -227,7 +225,7 @@ export default function MyPage() {
                         <button
                             onClick={() => setActiveTab("sold")}
                             className={`flex-1 px-4 py-3 text-sm font-semibold rounded-md transition-all ${activeTab === "sold"
-                                ? "bg-gray-900 text-white"
+                                ? "bg-gray-800 text-white"
                                 : "text-gray-600 hover:bg-gray-50"
                                 }`}
                         >
@@ -236,7 +234,7 @@ export default function MyPage() {
                         <button
                             onClick={() => setActiveTab("likes")}
                             className={`flex-1 px-4 py-3 text-sm font-semibold rounded-md transition-all ${activeTab === "likes"
-                                ? "bg-gray-900 text-white"
+                                ? "bg-gray-800 text-white"
                                 : "text-gray-600 hover:bg-gray-50"
                                 }`}
                         >
@@ -266,7 +264,7 @@ export default function MyPage() {
                                                 상품 등록하기
                                             </button>
                                         </div>
-                                    ) : (
+                                    ) : 
                                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                                             {sellingProducts.map((product) => (
                                                 <div key={product._id} className="relative group">
