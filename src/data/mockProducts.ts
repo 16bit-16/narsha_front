@@ -17,7 +17,6 @@ export interface Product {
     userId: string;
     nickname: string;
     profileImage?: string;
-    rating?: number;
   };
 
   lat?: number;

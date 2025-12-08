@@ -146,7 +146,7 @@ export default function ListingDetail() {
               <div className="text-center">
                 <h2 className="mb-2 text-2xl font-bold text-white">판매완료된 상품입니다.</h2>
                 <p className="pb-2 text-gray-300">더 이상 구매할 수 없습니다.</p>
-                <button onClick={() => {navigate("/")}} className="px-4 py-1 text-white bg-gray-800 rounded-lg">돌아가기</button>
+                <button onClick={() => { navigate("/") }} className="px-4 py-1 text-white bg-gray-800 rounded-lg">돌아가기</button>
               </div>
             </div>
           )}
@@ -206,7 +206,9 @@ export default function ListingDetail() {
                 ↗
               </button>
 
-              <button className="h-10 px-16 ml-auto text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50">
+              <button
+                onClick={() => navigate(`/chat/${product.seller._id}/${product._id}`)}
+                className="h-10 px-16 ml-auto text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50">
                 채팅하기
               </button>
 

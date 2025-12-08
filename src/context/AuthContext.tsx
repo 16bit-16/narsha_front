@@ -9,7 +9,7 @@ type User = {
   nickname: string;
   userId: string; 
   email: string;
-  profileImage: string;
+  profileImage?: string;
 };
 
 type AuthContextValue = {

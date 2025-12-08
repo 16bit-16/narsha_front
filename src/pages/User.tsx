@@ -172,20 +172,26 @@ export default function MyPage() {
                         <div className="flex items-center gap-6">
                             {/* 프로필 이미지 */}
                             <div className="flex items-center justify-center rounded-full shadow-md bg-gradient-to-br from-green-400 to-green-600 size-24">
-                                <img src={user.profileImage} alt="" />
+                                {user?.profileImage ? (
+                                    <img src={user.profileImage} alt={user.nickname} className="..." />
+                                ) : (
+                                    <div className="flex items-center justify-center ...">
+                                        <span>{user?.nickname?.charAt(0).toUpperCase() || "U"}</span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* 사용자 정보 */}
                             <div>
-                                <h1 className="mb-2 text-2xl font-bold text-gray-900">{user.nickname}</h1>
-                                <p className="text-sm text-gray-600">{user.email}</p>
+                                <h1 className="mb-2 text-2xl font-bold text-gray-900">{user?.nickname || "사용자"}</h1>
+                                <p className="text-sm text-gray-600">{user?.email || "이메일 없음"}</p>
                             </div>
                         </div>
 
                         {/* 버튼 */}
                         <div className="flex">
                             <button
-                                onClick={() => {navigate("/editprofile")}}
+                                onClick={() => { navigate("/editprofile") }}
                                 className="px-6 py-2.5 text-sm font-semibold border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                             >
                                 프로필 수정

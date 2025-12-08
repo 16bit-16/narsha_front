@@ -30,6 +30,7 @@ const QC = [
 ];
 
 export default function ProductNew() {
+  const [aiLoading, setAiLoading] = useState(false); // AI 로딩 상태
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priceRaw, setPriceRaw] = useState<string>("");
@@ -83,6 +84,10 @@ export default function ProductNew() {
       id: `${f.name}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     }));
     setSelFiles((prev) => [...prev, ...mapped]);
+    if (mapped.length > 0) {
+      analyzeImageWithAI(mapped[0]);
+    }
+
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,11 +121,11 @@ export default function ProductNew() {
 
   async function uploadImages(files: File[]): Promise<string[]> {
     if (!files.length) return [];
-    
+
     const token = sessionStorage.getItem("token");
     const fd = new FormData();
     files.forEach((f) => fd.append("files", f));
-    
+
     const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
     const res = await fetch(`${API_BASE}/uploads/images`, {
       method: "POST",
@@ -131,7 +136,7 @@ export default function ProductNew() {
       },
       body: fd,
     });
-    
+
     const data = await res.json();
     if (!res.ok || data.ok === false)
       throw new Error(data.error || "이미지 업로드 실패");
@@ -140,67 +145,134 @@ export default function ProductNew() {
 
   // pages/ProductNew.tsx - onSubmit 함수
 
-const onSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setTouched({ title: true, price: true });
-  setErrMsg(null);
-  if (!title.trim() || price <= 0) {
-    setErrMsg("필수 항목을 확인해 주세요.");
-    return;
-  }
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTouched({ title: true, price: true });
+    setErrMsg(null);
+    if (!title.trim() || price <= 0) {
+      setErrMsg("필수 항목을 확인해 주세요.");
+      return;
+    }
 
-  setBusy(true);
-  try {
-    const urls = await uploadImages(selFiles.map((s) => s.file));
+    setBusy(true);
+    try {
+      const urls = await uploadImages(selFiles.map((s) => s.file));
 
-    // ✅ data 변수 제거 (사용 안 하니까)
-    await api<{ ok: true; product: any }>("/products", {
-      method: "POST",
-      body: JSON.stringify({
-        title: title.trim(),
-        description: description.trim(),
-        price,
-        category,
-        location: location.trim() || "미정",
-        images: urls,
-        lat: selectedLat ?? undefined,
-        lng: selectedLng ?? undefined,
-        brand: Brand,
-        quality: Quality || "중",
-        buydate: BuyDate || "",
-        trade: Trade,
-        deliveryfee: DeliveryFee,
-        isSailed: IsSailed, 
-      }),
-    });
+      // ✅ data 변수 제거 (사용 안 하니까)
+      await api<{ ok: true; product: any }>("/products", {
+        method: "POST",
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          price,
+          category,
+          location: location.trim() || "미정",
+          images: urls,
+          lat: selectedLat ?? undefined,
+          lng: selectedLng ?? undefined,
+          brand: Brand,
+          quality: Quality || "중",
+          buydate: BuyDate || "",
+          trade: Trade,
+          deliveryfee: DeliveryFee,
+          isSailed: IsSailed,
+        }),
+      });
 
-    alert("상품이 등록되었습니다!");
-    navigate("/");
-    setTitle("");
-    setDescription("");
-    setPriceRaw("");
-    setCategory("기타");
-    setLocation("");
-    setSelFiles([]);
-    setTouched({});
-    setBrand("");
-    setQuality("");
-    setBuyDate("");
-    setTrade("");
-    setDeliveryFee("배송비 미포함");
-    setIsSailed(false);
-  } catch (e: any) {
-    setErrMsg(e.message || "문제가 발생했습니다.");
-  } finally {
-    setBusy(false);
-  }
-};
+      alert("상품이 등록되었습니다!");
+      navigate("/");
+      setTitle("");
+      setDescription("");
+      setPriceRaw("");
+      setCategory("기타");
+      setLocation("");
+      setSelFiles([]);
+      setTouched({});
+      setBrand("");
+      setQuality("");
+      setBuyDate("");
+      setTrade("");
+      setDeliveryFee("배송비 미포함");
+      setIsSailed(false);
+    } catch (e: any) {
+      setErrMsg(e.message || "문제가 발생했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const titleError = touched.title && !title.trim();
   const priceError = touched.price && price <= 0;
 
+  const analyzeImageWithAI = async (selFile: SelFile) => {
+    setAiLoading(true);
+    setErrMsg(null);
+
+    try {
+      // 1️⃣ 이미지를 먼저 API에 업로드해서 URL 얻기
+      const fd = new FormData();
+      fd.append("files", selFile.file);
+
+      const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
+      const token = sessionStorage.getItem("token");
+
+      const uploadRes = await fetch(`${API_BASE}/uploads/images`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: fd,
+      });
+
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok || uploadData.ok === false) {
+        throw new Error(uploadData.error || "이미지 업로드 실패");
+      }
+
+      const imageUrl = uploadData.urls?.[0];
+      if (!imageUrl) throw new Error("이미지 URL을 받지 못했습니다");
+
+      // 2️⃣ AI로 설명문 생성
+      console.log("AI가 설명문을 작성 중입니다...");
+      const aiRes = await api<{
+        ok: true;
+        data: {
+          title: string;
+          quality: string;
+          brand: string;
+          description: string;
+        };
+      }>("/ai/generate-description", {
+        method: "POST",
+        body: JSON.stringify({ imageUrl }),
+      });
+
+      if (aiRes.ok && aiRes.data) {
+        // ✅ AI가 생성한 데이터로 폼 채우기
+        setTitle(aiRes.data.title || "");
+        setQuality(aiRes.data.quality || "상");
+        setBrand(aiRes.data.brand || "");
+        setDescription(aiRes.data.description || "");
+
+        console.log("AI 설명문 생성 완료!");
+        setErrMsg(null);
+      }
+    } catch (err: any) {
+      console.error("AI 분석 실패:", err);
+      setErrMsg(err.message || "AI 설명문 생성 실패");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <div className="py-10">
+      {aiLoading && (
+        <div className="p-4 mb-4 border border-blue-200 rounded-lg bg-blue-50">
+          <p className="text-sm text-blue-700">AI가 상품 정보를 분석 중입니다...</p>
+        </div>
+      )}
       <div className="w-full mx-auto">
         <h1 className="mb-8 text-3xl font-extrabold">상품 등록</h1>
 
@@ -410,9 +482,9 @@ const onSubmit = async (e: React.FormEvent) => {
           {/* 제출 */}
           <button
             className="btn-primary"
-            disabled={busy || !title.trim() || price <= 0}
+            disabled={busy || !title.trim() || price <= 0 || aiLoading}
           >
-            {busy ? "등록 중..." : "등록하기"}
+            {busy ? "등록 중..." : aiLoading ? "AI 분석 중..." : "등록하기"}
           </button>
         </form>
       </div>

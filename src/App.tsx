@@ -15,6 +15,7 @@ import FindPw from "./pages/FindPw";
 import Tos from "./pages/TOS";
 import Privacy from "./pages/PrivacyPolicy"
 import EditProfile from "./pages/EditProfile";
+import Chat from "./pages/Chat";
 
 const HIDE_LAYOUT_PATHS = ["/login", "/signup","/find"] as const;
 console.log(import.meta.env.VITE_KAKAOMAP_KEY);
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/tos" element={<Tos />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/editprofile" element={<EditProfile />} />
+            <Route path="/chat/:receiverId/:productId" element={<Chat />} />
 
             {/* 인증 필요한 페이지 (예시) */}
             {/*
