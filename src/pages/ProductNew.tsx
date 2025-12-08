@@ -65,6 +65,36 @@ export default function ProductNew() {
     [selFiles]
   );
 
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const files: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            files.push(file);
+          }
+        }
+      }
+
+      if (files.length > 0) {
+        e.preventDefault(); // 기본 붙여넣기 동작 방지
+        addFiles(files);
+      }
+    };
+
+    // 전역 이벤트 리스너 등록
+    window.addEventListener('paste', handlePaste);
+
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+    };
+  }, [selFiles.length]);
+
   const onPriceChange = (val: string) => {
     const digits = val.replace(/[^\d]/g, "");
     if (!digits) return setPriceRaw("");
@@ -296,6 +326,9 @@ export default function ProductNew() {
               </div>
               <div className="mt-1 text-xs text-gray-500">
                 JPG, PNG, GIF, WEBP, BMP 지원 • 현재 {selFiles.length}/5
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                Ctrl+V (또는 Cmd+V)로 이미지를 붙여넣을수 있습니다
               </div>
               <input
                 ref={fileInputRef}
