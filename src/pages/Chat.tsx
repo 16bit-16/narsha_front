@@ -39,7 +39,7 @@ export default function Chat() {
         // ✅ 연결 후 사용자 ID 전송
         newSocket.on("connect", () => {
             console.log("✅ WebSocket 연결됨");
-            newSocket.emit("join", user.id);
+            newSocket.emit("join", user._id);
         });
 
         // ✅ 메시지 수신
@@ -120,11 +120,11 @@ export default function Chat() {
                     messages.map((msg) => (
                         <div
                             key={msg._id}
-                            className={`flex ${msg.senderId === user.id ? "justify-end" : "justify-start"
+                            className={`flex ${msg.senderId === user._id ? "justify-end" : "justify-start"
                                 }`}
                         >
                             <div
-                                className={`max-w-xs px-4 py-2 rounded-lg ${msg.senderId === user.id
+                                className={`max-w-xs px-4 py-2 rounded-lg ${msg.senderId === user._id
                                         ? "bg-blue-500 text-white"
                                         : "bg-gray-200 text-gray-900"
                                     }`}

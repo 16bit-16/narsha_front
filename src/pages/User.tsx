@@ -1,5 +1,3 @@
-// client/src/pages/MyPage.tsx
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -166,7 +164,7 @@ export default function MyPage() {
                             {/* 프로필 이미지 */}
                             <div className="flex items-center justify-center rounded-full shadow-md bg-gradient-to-br from-green-400 to-green-600 size-24">
                                 {user?.profileImage ? (
-                                    <img src={user.profileImage} alt={user.nickname} className="..." />
+                                    <img src={user.profileImage} alt={user.nickname} className="rounded-full" />
                                 ) : (
                                     <div className="flex items-center justify-center ...">
                                         <span>{user?.nickname?.charAt(0).toUpperCase() || "U"}</span>
@@ -301,11 +299,6 @@ export default function MyPage() {
                                             {soldProducts.map((product) => (
                                                 <div key={product._id} className="relative">
                                                     <ProductCard item={product} />
-                                                    <div className="absolute inset-0 flex items-center justify-center h-64 bg-black/30 rounded-xl">
-                                                        <span className="px-4 py-2 text-2xl font-semibold text-white rounded-lg">
-                                                            판매완료
-                                                        </span>
-                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

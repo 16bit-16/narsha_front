@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { api } from "../utils/api";
 
 type User = { 
-  id: string; 
+  _id: string; 
   nickname: string;
   userId: string; 
   email: string;
@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const me = await api<{ ok: true; user: User }>("/auth/me");
+        console.log("✅ 받은 사용자 데이터:", me.user);
         setUser(me.user);
       } catch {
         setUser(null);

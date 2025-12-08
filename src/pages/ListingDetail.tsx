@@ -154,7 +154,7 @@ export default function ListingDetail() {
           <section className="flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="bg-gray-800 rounded-full size-10" />
+                <img src={product.seller.profileImage} alt="" className="rounded-full size-10"/>
                 <div>
                   <div className="text-sm font-semibold">
                     {product.seller?.nickname || "알수없음"}

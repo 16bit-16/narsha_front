@@ -17,6 +17,21 @@ export default function ProductCard({ item }: Props) {
       className="block transition "
     >
       <div className="bg-[#fcfcfc] aspect-square overflow-hidden rounded-xl">
+        {item.status == "sold" && (
+          <div className="relative w-full h-full overflow-hidden rounded-xl">
+            <img
+              src={imageSrc}
+              alt={item.title}
+              className="object-cover w-full h-full transition hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
+              <span className="px-6 py-3 text-2xl font-bold text-white rounded-lg">
+                판매완료
+              </span>
+            </div>
+          </div>
+        )}
         <img
           src={imageSrc}
           alt={item.title}
