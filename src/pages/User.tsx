@@ -123,13 +123,6 @@ export default function MyPage() {
                                 상품 보기
                             </button>
 
-                            <button
-                                onClick={() => navigate(`/edit/${selectedProduct._id}`)}
-                                className="w-full px-4 py-3 text-left transition-colors rounded-lg hover:bg-gray-50"
-                            >
-                                수정하기
-                            </button>
-
                             {selectedProduct.status === "selling" ? (
                                 <button
                                     onClick={() => handleStatusChange("sold")}
@@ -304,7 +297,7 @@ export default function MyPage() {
                                             <p className="text-gray-500">판매완료된 상품이 없습니다</p>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                                             {soldProducts.map((product) => (
                                                 <div key={product._id} className="relative">
                                                     <ProductCard item={product} />
@@ -328,7 +321,7 @@ export default function MyPage() {
                                             <p className="text-gray-500">찜한 상품이 없습니다</p>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                                             {likedProducts.map((product) => (
                                                 <ProductCard key={product._id} item={product} />
                                             ))}
