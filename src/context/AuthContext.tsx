@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const me = await api<{ ok: true; user: User }>("/auth/me");
-        console.log("✅ 받은 사용자 데이터:", me.user);
         setUser(me.user);
       } catch {
         setUser(null);

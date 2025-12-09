@@ -103,6 +103,10 @@ export default function Signup() {
   // 상태
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [userIdChecked, setUserIdChecked] = useState(false);
+  const [userIdAvailable, setUserIdAvailable] = useState(false);
+  const [checkingUserId, setCheckingUserId] = useState(false);
+  const [userIdError, setUserIdError] = useState("");
   const [signing, setSigning] = useState(false);
   const [verified, setVerified] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -161,6 +165,47 @@ export default function Signup() {
     }
   }, [email, code]);
 
+  const handleCheckUserId = async () => {
+    if (!userId.trim() || userId.length < 3) {
+      setUserIdError("아이디는 3자 이상이어야 합니다");
+      alert("아이디는 3자 이상이어야 합니다.");
+      return;
+    }
+
+    setCheckingUserId(true);
+    setUserIdError("");
+
+    try {
+      const data = await request<{
+        ok: true;
+        available: boolean;
+        message: string;
+      }>("/auth/checkId", { 
+        method: "POST",
+        body: JSON.stringify({ userId: userId.trim() }),
+      });
+
+      if (data.available) {
+        setUserIdAvailable(true);
+        setUserIdChecked(true);
+        setUserIdError("");
+        alert("사용 가능한 아이디입니다.");
+      } else {
+        setUserIdAvailable(false);
+        setUserIdChecked(false);
+        setUserIdError(data.message || "이미 사용 중인 아이디입니다");
+        alert("이미 사용 중인 아이디입니다.");
+      }
+    } catch (err: any) {
+      setUserIdError(err.message || "확인 실패");
+      alert("아이디 확인에 실패했습니다. 다시 시도해주세요.");
+      setUserIdAvailable(false);
+      setUserIdChecked(false);
+    } finally {
+      setCheckingUserId(false);
+    }
+  };
+
   const doSignup = useCallback(async () => {
     setErr(null);
     setMsg(null);
@@ -186,21 +231,7 @@ export default function Signup() {
   return (
     <>
       <div className="flex justify-between h-screen md:bg-[#fcfcfc] bg-zinc-400">
-        <div className="bg-gradient-to-b from-black rounded-xl m-1 to-gray-800 w-[70%] items-center justify-center flex p-20 flex-row gap-5 hidden md:flex">
-          <div className="text-left">
-            <p className="text-zinc-300 leading-tight text-[35px] md:text-[30px]">
-              빠르고
-              <br />
-              간편한
-              <br />
-              중고거래
-            </p>
-            <img src="/logo_white.png" className="h-24"/>
-          </div>
-          <img src="/palpal_mockup.png" className="h-[30rem]"/>
-        </div>
-
-        {/* 오른쪽 단계별 폼 */}
+        {/* 왼쪽 단계별 폼 */}
         <div className="flex flex-col justify-center items-center bg-[#fcfcfc] md:w-[30%] w-[100%] mx-[auto]">
           <a href="/" className="w-48">
             <img src="/logo_black.png" alt="" />
@@ -295,12 +326,25 @@ export default function Signup() {
                 if (canGoStep2) setStep(2);
               }}
             >
-              <BaseInput
-                placeholder="아이디"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                autoComplete="username"
-              />
+              <div className="relative">
+                <BaseInput
+                  placeholder="아이디"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                  autoComplete="username"
+                />
+                <div className="absolute flex items-center gap-2 text-xs -translate-y-1/2 right-2 top-1/2">
+                  <button
+                    type="button"
+                    onClick={handleCheckUserId}
+                    disabled={checkingUserId || !userId.trim()}
+                    className="px-2 py-1 text-white bg-gray-800 rounded hover:bg-gray-700 disabled:opacity-50"
+                    title="아이디 중복 확인"
+                  >
+                    {verifying ? "확인중" : "중복 확인"}
+                  </button>
+                </div>
+              </div>
               <BaseInput
                 type="password"
                 placeholder="비밀번호"
@@ -435,7 +479,7 @@ export default function Signup() {
 
               {verified && (
                 <p className="text-xs text-center text-emerald-800">
-                  이메일 인증 완료 
+                  이메일 인증 완료
                 </p>
               )}
               {msg && (
@@ -455,6 +499,20 @@ export default function Signup() {
               </p>
             </form>
           )}
+        </div>
+        {/* 오른쪽 */}
+        <div className="bg-gradient-to-b from-black rounded-xl m-1 to-gray-800 w-[70%] items-center justify-center flex p-20 flex-row gap-5 hidden md:flex">
+          <div className="text-left">
+            <p className="text-zinc-300 leading-tight text-[35px] md:text-[30px]">
+              빠르고
+              <br />
+              간편한
+              <br />
+              중고거래
+            </p>
+            <img src="/logo_white.png" className="h-24" />
+          </div>
+          <img src="/palpal_mockup.png" className="h-[30rem]" />
         </div>
       </div>
     </>

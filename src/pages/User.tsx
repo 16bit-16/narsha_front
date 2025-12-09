@@ -162,7 +162,7 @@ export default function MyPage() {
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-6">
                             {/* 프로필 이미지 */}
-                            <div className="flex items-center justify-center rounded-full shadow-md bg-gradient-to-br from-green-400 to-green-600 size-24">
+                            <div className="flex items-center justify-center text-white rounded-full bg-gradient-to-br from-gray-400 to-gray-600 size-24">
                                 {user?.profileImage ? (
                                     <img src={user.profileImage} alt={user.nickname} className="rounded-full" />
                                 ) : (
