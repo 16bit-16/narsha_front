@@ -103,10 +103,7 @@ export default function Signup() {
   // 상태
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [userIdChecked, setUserIdChecked] = useState(false);
-  const [userIdAvailable, setUserIdAvailable] = useState(false);
   const [checkingUserId, setCheckingUserId] = useState(false);
-  const [userIdError, setUserIdError] = useState("");
   const [signing, setSigning] = useState(false);
   const [verified, setVerified] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -167,13 +164,11 @@ export default function Signup() {
 
   const handleCheckUserId = async () => {
     if (!userId.trim() || userId.length < 3) {
-      setUserIdError("아이디는 3자 이상이어야 합니다");
       alert("아이디는 3자 이상이어야 합니다.");
       return;
     }
 
     setCheckingUserId(true);
-    setUserIdError("");
 
     try {
       const data = await request<{
@@ -186,21 +181,12 @@ export default function Signup() {
       });
 
       if (data.available) {
-        setUserIdAvailable(true);
-        setUserIdChecked(true);
-        setUserIdError("");
         alert("사용 가능한 아이디입니다.");
       } else {
-        setUserIdAvailable(false);
-        setUserIdChecked(false);
-        setUserIdError(data.message || "이미 사용 중인 아이디입니다");
         alert("이미 사용 중인 아이디입니다.");
       }
     } catch (err: any) {
-      setUserIdError(err.message || "확인 실패");
       alert("아이디 확인에 실패했습니다. 다시 시도해주세요.");
-      setUserIdAvailable(false);
-      setUserIdChecked(false);
     } finally {
       setCheckingUserId(false);
     }
