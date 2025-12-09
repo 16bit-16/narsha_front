@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import MobileMenu from "./components/MobileMenu";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -16,6 +17,7 @@ import Tos from "./pages/TOS";
 import Privacy from "./pages/PrivacyPolicy"
 import EditProfile from "./pages/EditProfile";
 import Chat from "./pages/Chat";
+import Category from "./pages/Category";
 
 const HIDE_LAYOUT_PATHS = ["/login", "/signup","/find"] as const;
 console.log(import.meta.env.VITE_KAKAOMAP_KEY);
@@ -27,7 +29,7 @@ const shouldHideLayout = (pathname: string) =>
 export default function App() {
   const { pathname } = useLocation();
   const hideLayout = shouldHideLayout(pathname);
-  const mainClass = hideLayout ? "flex-1" : "container flex-1";
+  const mainClass = hideLayout ? "flex-1" : "p-2 md:container flex-1";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -51,6 +53,9 @@ export default function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/editprofile" element={<EditProfile />} />
             <Route path="/chat/:receiverId/:productId" element={<Chat />} />
+            
+            {/* 헤더 선택자 */}
+            <Route path="/category" element={<Category />} />
 
             {/* 인증 필요한 페이지 (예시) */}
             {/*
@@ -64,6 +69,7 @@ export default function App() {
 
         {/* 로그인/회원가입 페이지에서는 Footer 숨김 */}
         {!hideLayout && <Footer />}
+        {!hideLayout && <MobileMenu />}
       </AuthProvider>
     </div>
   );

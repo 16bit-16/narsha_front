@@ -4,7 +4,7 @@ export default function Footer() {
   const navigate = useNavigate();
   return (
     <footer className="mt-12 border-t bg-gray-50">
-      <div className="container flex flex-col gap-2 py-6 text-sm text-gray-600">
+      <div className="flex flex-col gap-2 px-2 py-6 text-sm text-gray-600 md:container">
         <div className="flex flex-wrap gap-4 text-sm">
           <button onClick={() => {navigate("/")}} className="duration-150 hover:font-bold hover:text-black">회사소개</button>
           <button onClick={() => {navigate("/tos")}} className="duration-150 hover:font-bold hover:text-black">이용약관</button>
@@ -43,11 +43,11 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex justify-between pt-2 text-xs">
+        <div className="pt-2 text-xs md:justify-between md:flex">
           <p className="leading-6">
             (주)PALPAL은 통신판매중개자로서 거래 당사자가 아니며 판매 회원과 구매 회원 간의 상품거래 정보 및 거래에 관여하지 않고, 어떠한 의무와 책임도 부담하지 않습니다.
           </p>
-          <p className="text-gray-400">© {new Date().getFullYear()} PALPAL</p>
+          <p className="pt-4 text-gray-400 md:pt-0">© {new Date().getFullYear()} PALPAL</p>
         </div>
       </div>
     </footer>

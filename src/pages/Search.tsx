@@ -43,7 +43,7 @@ export default function Search() {
             ) : products.length === 0 ? (
                 <p className="text-gray-500">검색 결과가 없습니다.</p>
             ) : (
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                     {products.map((p) => (
                         <ProductCard key={p._id} item={p} />
                     ))}

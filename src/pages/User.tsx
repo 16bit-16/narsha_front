@@ -159,7 +159,7 @@ export default function MyPage() {
             <div className="py-4 space-y-4">
                 {/* 프로필 카드 */}
                 <div className="p-8 bg-white border shadow-sm rounded-2xl">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex-row items-center justify-between mb-6 md:flex">
                         <div className="flex items-center gap-6">
                             {/* 프로필 이미지 */}
                             <div className="flex items-center justify-center text-white rounded-full bg-gradient-to-br from-gray-400 to-gray-600 size-24">
@@ -174,7 +174,7 @@ export default function MyPage() {
 
                             {/* 사용자 정보 */}
                             <div>
-                                <h1 className="mb-2 text-2xl font-bold text-gray-900">{user?.nickname || "사용자"}</h1>
+                                <h1 className="pt-3 mb-2 text-2xl font-bold text-gray-90 sm:pt-0">{user?.nickname || "사용자"}</h1>
                                 <p className="text-sm text-gray-600">{user?.email || "이메일 없음"}</p>
                             </div>
                         </div>
@@ -183,7 +183,7 @@ export default function MyPage() {
                         <div className="flex">
                             <button
                                 onClick={() => { navigate("/editprofile") }}
-                                className="px-6 py-2.5 text-sm font-semibold border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                className="px-6 py-2.5 text-sm mt-3 font-semibold border w-full border-gray-300 rounded-lg md:w-auto md:mt-0 hover:bg-gray-50 transition-colors"
                             >
                                 프로필 수정
                             </button>

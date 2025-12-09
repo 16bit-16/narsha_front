@@ -55,7 +55,7 @@ export default function Header() {
         </button>
 
         {/* ✅ 검색창 */}
-        <div className="flex flex-1 max-w-xl ml-6 rounded-md bg-[#efefef] px-4">
+        <div className="hidden flex-1 max-w-xl ml-6 rounded-md bg-[#efefef] px-4 md:flex">
           <div className="flex items-center justify-center">
             <img src="/search.svg" alt="" className="w-3 h-3 opacity-40" />
           </div>
@@ -70,7 +70,7 @@ export default function Header() {
         </div>
 
         {/* 우측 메뉴 */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="items-center hidden gap-2 ml-auto md:flex">
 
           <button
             onClick={goSell}
@@ -124,8 +124,8 @@ export default function Header() {
       {/* 하단 카테고리 메뉴 */}
       <div className="flex max-w-6xl gap-6 px-4 py-1 mx-auto text-sm text-gray-600">
         {[
-          { to: "/feed/recommend", label: "추천" },
-          { to: "/categories", label: "카테고리" },
+          { to: "/", label: "추천" },
+          { to: "/category", label: "카테고리" },
           { to: "/feed/hot", label: "인기" },
           { to: "/feed/new", label: "최신" },
         ].map(({ to, label }) => (

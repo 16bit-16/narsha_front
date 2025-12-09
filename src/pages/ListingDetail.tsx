@@ -154,7 +154,7 @@ export default function ListingDetail() {
           <section className="flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <img src={product.seller.profileImage} alt="" className="rounded-full size-10"/>
+                <img src={product.seller.profileImage} alt="" className="rounded-full size-10" />
                 <div>
                   <div className="text-sm font-semibold">
                     {product.seller?.nickname || "알수없음"}
@@ -166,7 +166,12 @@ export default function ListingDetail() {
               </div>
 
               <div>
-                <h1 className="text-xl font-semibold">{product.title}</h1>
+                <div className="flex justify-between">
+                  <h1 className="text-xl font-semibold">{product.title}</h1>
+                  <button className="flex px-3 py-2 text-lg text-gray-600 md:hidden hover:bg-zinc-50" title="공유하기" onClick={() => { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!") }}>
+                    ↗
+                  </button>
+                </div>
                 <div className="mt-1 text-3xl font-bold">
                   {Number(product.price).toLocaleString()}원
                 </div>
@@ -181,7 +186,7 @@ export default function ListingDetail() {
                 </div>
               </div>
 
-              <div className="leading-6 whitespace-pre-line text-zinc-700">
+              <div className="pb-4 leading-6 whitespace-pre-line text-zinc-700 md:pb-0">
                 {product.description?.trim()
                   ? product.description
                   : "판매자가 설명을 입력하지 않았습니다."}
@@ -193,7 +198,7 @@ export default function ListingDetail() {
               <button
                 onClick={handleLike}
                 disabled={likeBusy}
-                className={`px-3 py-2 text-lg transition-colors ${isLiked
+                className={`p-2 text-lg transition-colors ${isLiked
                   ? "text-red-500 hover:text-red-600"
                   : "text-gray-600 hover:text-red-500"
                   } ${likeBusy ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -202,18 +207,13 @@ export default function ListingDetail() {
                 {isLiked ? "♥" : "♡"}
               </button>
 
-              <button className="px-3 py-2 text-lg text-gray-600 hover:bg-zinc-50">
+              <button className="hidden px-3 py-2 text-lg text-gray-600 md:flex hover:bg-zinc-50" title="공유하기" onClick={() => { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!") }}>
                 ↗
               </button>
-
               <button
                 onClick={() => navigate(`/chat/${product.seller._id}/${product._id}`)}
-                className="h-10 px-16 ml-auto text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50">
+                className="h-10 px-16 text-sm font-semibold border border-gray-800 rounded w-80 hover:bg-zinc-50">
                 채팅하기
-              </button>
-
-              <button className="h-10 px-16 text-sm font-semibold text-white bg-gray-800 rounded hover:opacity-90">
-                구매하기
               </button>
             </div>
           </section>

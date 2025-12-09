@@ -1,6 +1,6 @@
 export default function Banner() {
   return (
-    <div className="py-4">
+    <div className="hidden py-4 md:flex">
       <img
         src="Banner.png"
         alt="배너"
