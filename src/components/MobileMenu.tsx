@@ -57,7 +57,7 @@ export default function MobileBottomNav() {
                         className={`flex flex-col items-center justify-center w-full h-full gap-1 ${isActive("/") ? "text-black" : "text-gray-600"
                             }`}
                     >
-                        <img src="https://cdn-icons.flaticon.com/svg/19026/19026006.svg?token=exp=1765263495~hmac=2ae499819471967ebfa61572180e145e" alt="" className="size-4"/>
+                        <img src="https://cdn-icons-png.flaticon.com/512/1946/1946488.png" alt="" className="size-4"/>
                         <span className="text-xs font-semibold">홈</span>
                     </button>
 
