@@ -12,7 +12,7 @@ export default function MobileBottomNav() {
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
-    // ✅ 스크롤 감지
+    // 스크롤 감지
     useEffect(() => {
         let ticking = false;
 
@@ -45,7 +45,6 @@ export default function MobileBottomNav() {
 
     return (
         <>
-            {/* ✅ 모바일에서만 보임 (md: 이상에서 숨김) */}
             <nav
                 className={`fixed z-50 bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "translate-y-full"
                     }`}

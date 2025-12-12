@@ -3,7 +3,7 @@ export type ApiError = { error?: string; message?: string };
 const API_BASE = import.meta.env.VITE_API_BASE || "https://palpalshop.shop/api";
 
 
-// ✅ 하나의 통합된 api 함수
+// 하나의 통합된 api 함수
 export async function api<T = any>(
   path: string,
   options: RequestInit = {}
@@ -32,7 +32,7 @@ export async function api<T = any>(
   return data as T;
 }
 
-// ✅ 헬퍼 함수들 (api 함수 사용)
+// 헬퍼 함수들 (api 함수 사용)
 async function post<T>(path: string, body: any): Promise<T> {
   return api<T>(path, {
     method: "POST",

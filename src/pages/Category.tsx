@@ -23,7 +23,7 @@ export default function Category() {
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // ✅ 처음 한 번만 모든 상품 로드
+    // 처음 한 번만 모든 상품 로드
     useEffect(() => {
         loadAllProducts();
     }, []);
@@ -42,14 +42,14 @@ export default function Category() {
         }
     };
 
-    // ✅ 선택된 카테고리의 상품만 필터링
+    // 선택된 카테고리의 상품만 필터링
     const filteredProducts = allProducts.filter(
         (p) => p.category === selectedCategory && p.status === "selling"
     );
 
     return (
         <div className="pb-20 md:pb-0">
-            {/* ✅ 카테고리 탭 */}
+            {/* 카테고리 탭 */}
             <div className="sticky top-0 z-10 bg-white border-b">
                 <div className="flex w-full gap-2 px-4 py-4 overflow-x-auto text-sm snap-x">
                     {CATEGORIES.map((category) => (
@@ -68,7 +68,7 @@ export default function Category() {
                 </div>
             </div>
 
-            {/* ✅ 상품 섹션 */}
+            {/* 상품 섹션 */}
             <div className="px-4 py-6">
                 <h2 className="mb-4 text-lg font-bold">{selectedCategory}</h2>
 

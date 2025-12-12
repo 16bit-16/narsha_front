@@ -12,7 +12,7 @@ export default function ImageCarousel({ images }: Props) {
   const next = () => setCurrent((c) => (c + 1) % total);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg">
+    <div className="relative w-full overflow-hidden rounded-lg ">
       {/* 이미지 컨테이너 */}
       <div
         className="flex transition-transform duration-300 ease-in-out"

@@ -15,7 +15,7 @@ export default function EditProfile() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    // ✅ user가 로드되면 상태 초기화
+    // user가 로드되면 상태 초기화
     useEffect(() => {
         if (user) {
             setNewNickname(user.nickname || "");
@@ -70,13 +70,13 @@ export default function EditProfile() {
                 return;
             }
 
-            // ✅ data 사용
+            // data 사용
             const data = await api<{ ok: true; user: any }>("/users/profile", {
                 method: "PATCH",
                 body: JSON.stringify(body),
             });
 
-            // ✅ 성공하면 사용자 정보 갱신
+            // 성공하면 사용자 정보 갱신
             if (data.ok) {
                 await refresh();
                 setSuccess(true);
@@ -91,7 +91,7 @@ export default function EditProfile() {
         }
     };
 
-    // ✅ 안전한 아바타 문자 추출
+    // 안전한 아바타 문자 추출
     const getAvatarLetter = () => {
         const nick = newNickname || user?.nickname || "";
         return nick.charAt(0).toUpperCase() || "U";

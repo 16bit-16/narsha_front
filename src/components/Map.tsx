@@ -13,14 +13,14 @@ interface KakaoMapProps {
     onSelect: (info: MapSelectInfo) => void;
     center?: { lat: number; lng: number };
     marker?: { lat: number; lng: number };
-    readOnly?: boolean; // ✅ 읽기 전용 모드 추가
+    readOnly?: boolean; // 읽기 전용 모드 추가
 }
 
 export default function Map({ 
     onSelect, 
     center: propCenter, 
     marker: propMarker,
-    readOnly = false // ✅ 기본값 false
+    readOnly = false // 기본값 false
 }: KakaoMapProps) {
     const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
     const [center, setCenter] = useState({ lat: 35.8714, lng: 128.6014 });
@@ -37,7 +37,7 @@ export default function Map({
         }
     }, [loading, error]);
 
-    // ✅ props 처리 개선
+    // props 처리 개선
     useEffect(() => {
         if (propCenter) {
             setCenter(propCenter);
@@ -66,7 +66,7 @@ export default function Map({
     }, [loaded, readOnly, propCenter, propMarker]);    
 
     const handleClick = (_t: any, mouseEvent: kakao.maps.event.MouseEvent) => {''
-        // ✅ 읽기 전용 모드면 클릭 무시
+        // 읽기 전용 모드면 클릭 무시
         if (readOnly) return;
 
         const lat = mouseEvent.latLng.getLat();
@@ -99,7 +99,7 @@ export default function Map({
         );
     }
 
-    // ✅ 표시할 마커 결정
+    // 표시할 마커 결정
     const displayMarker = propMarker || marker;
 
     return (

@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(me.user);
       } catch {
         setUser(null);
-        sessionStorage.removeItem("token"); // ✅ 만료된 토큰 제거
+        sessionStorage.removeItem("token"); // 만료된 토큰 제거
       } finally {
         setLoading(false);
       }
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       );
       
-      sessionStorage.setItem("token", res.token); // ✅ 변경
+      sessionStorage.setItem("token", res.token); // 변경
       setUser(res.user);
     } finally {
       setAuthBusy(false);
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api<{ ok: true }>("/auth/logout", { method: "POST" });
       alert("로그아웃되었습니다.");
-      // ✅ localStorage에서 토큰 제거
+      // localStorage에서 토큰 제거
       sessionStorage.removeItem("token");
       setUser(null);
     } finally {

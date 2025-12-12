@@ -17,7 +17,7 @@ export default function Search() {
         async function search() {
             setLoading(true);
             try {
-                // ✅ api 함수 사용
+                // api 함수 사용
                 const data = await api<{ ok: true; products: Product[] }>(
                     `/products/search?q=${encodeURIComponent(query)}`
                 );

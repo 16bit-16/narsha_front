@@ -14,7 +14,7 @@ export default function MyPage() {
     const [likedProducts, setLikedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // ✅ 설정 메뉴 상태
+    // 설정 메뉴 상태
     const [showMenu, setShowMenu] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -75,7 +75,7 @@ export default function MyPage() {
         }
     };
 
-    // ✅ 상품 삭제
+    // 상품 삭제
     const handleDelete = async () => {
         if (!selectedProduct) return;
         if (!confirm("정말 삭제하시겠습니까?")) return;

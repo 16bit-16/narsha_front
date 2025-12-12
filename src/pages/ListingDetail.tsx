@@ -17,7 +17,7 @@ export default function ListingDetail() {
   const [err, setErr] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
 
-  // ✅ 좋아요 상태 관리
+  // 좋아요 상태 관리
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [likeBusy, setLikeBusy] = useState(false);
@@ -30,17 +30,17 @@ export default function ListingDetail() {
       setLoading(true);
       setErr(null);
       try {
-        // ✅ api 함수 사용
+        // api 함수 사용
         const pJson = await api<{ ok: true; product: Product; isLiked: boolean }>(
           `/products/${id}`
         );
         const item: Product = pJson.product;
 
-        // ✅ 좋아요 정보 초기화
+        // 좋아요 정보 초기화
         setIsLiked(pJson.isLiked || false);
         setLikeCount(item.likeCount || 0);
 
-        // ✅ api 함수 사용
+        // api 함수 사용
         const lJson = await api<{ ok: true; products: Product[] }>("/products");
         const list: Product[] = lJson.products || [];
 
@@ -61,7 +61,7 @@ export default function ListingDetail() {
     };
   }, [id]);
 
-  // ✅ 좋아요 토글 함수
+  // 좋아요 토글 함수
   const handleLike = async () => {
     if (!id || likeBusy) return;
 
@@ -74,7 +74,7 @@ export default function ListingDetail() {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
 
     try {
-      // ✅ api 함수 사용
+      // api 함수 사용
       const data = await api<{
         ok: true;
         isLiked: boolean;
@@ -193,8 +193,8 @@ export default function ListingDetail() {
               </div>
             </div>
 
-            {/* ✅ 좋아요 버튼 업데이트 */}
-            <div className="flex items-center gap-3">
+            {/* 좋아요 버튼 업데이트 */}
+            <div className="flex items-center gap-3 pt-6">
               <button
                 onClick={handleLike}
                 disabled={likeBusy}

@@ -1,163 +1,263 @@
-import { useEffect, useState } from "react";
+// src/pages/Chat.tsx
+
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
-import { io, Socket } from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 
 interface Message {
     _id: string;
+    roomId: string;
+    senderId: {
+        _id: string;
+        nickname: string;
+        profileImage?: string;
+    };
+    receiverId: {
+        _id: string;
+        nickname: string;
+        profileImage?: string;
+    };
+    productId: string;
     text: string;
-    senderId: string;
-    receiverId: string;
+    read: boolean;
     createdAt: string;
 }
 
+interface Product {
+    _id: string;
+    title: string;
+    price: number;
+    images: string[];
+}
+
 export default function Chat() {
+    const { receiverId, productId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { receiverId, productId } = useParams<{ receiverId: string; productId: string }>();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const socketRef = useRef<Socket | null>(null);
 
     const [messages, setMessages] = useState<Message[]>([]);
-    const [inputText, setInputText] = useState("");
-    const [socket, setSocket] = useState<Socket | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [product, setProduct] = useState<Product | null>(null);
+    const [otherUser, setOtherUser] = useState<any>(null);
+    const [messageText, setMessageText] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [sending, setSending] = useState(false);
 
-    // ✅ Socket.io 연결
     useEffect(() => {
-        if (!user) return;
-
-        const newSocket = io(
-            import.meta.env.VITE_API_BASE?.replace("/api", "") || "http://localhost:4000",
-            {
-                reconnection: true,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
-                reconnectionAttempts: 5,
-            }
-        );
-
-        // ✅ 연결 후 사용자 ID 전송
-        newSocket.on("connect", () => {
-            console.log("✅ WebSocket 연결됨");
-            newSocket.emit("join", user._id);
-        });
-
-        // ✅ 메시지 수신
-        newSocket.on("receive_message", (message: Message) => {
-            setMessages((prev) => [...prev, message]);
-        });
-
-        // ✅ 메시지 전송 확인
-        newSocket.on("message_sent", (message: Message) => {
-            setMessages((prev) => [...prev, message]);
-        });
-
-        setSocket(newSocket);
-
-        return () => {
-            newSocket.disconnect();
-        };
-    }, [user]);
-
-    // ✅ 채팅 히스토리 로드
-    useEffect(() => {
-        if (!user || !receiverId || !productId) return;
-
-        async function loadMessages() {
-            try {
-                const data = await api<{ ok: true; messages: Message[] }>(
-                    `/messages/chat/${receiverId}/${productId}`
-                );
-                setMessages(data.messages);
-            } catch (err) {
-                console.error("메시지 로드 실패:", err);
-            } finally {
-                setLoading(false);
-            }
+        if (user && receiverId && productId) {
+            loadChatData();
+            initializeSocket();
         }
-
-        loadMessages();
     }, [user, receiverId, productId]);
 
-    const handleSendMessage = (e: React.FormEvent) => {
-        e.preventDefault();
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
-        if (!inputText.trim() || !socket || !receiverId || !productId) return;
+    const loadChatData = async () => {
+        setLoading(true);
+        try {
+            const [messagesData, productData] = await Promise.all([
+                api<{ ok: true; messages: Message[] }>(
+                    `/messages/chat/${receiverId}/${productId}`
+                ),
+                api<{ ok: true; product: Product }>(`/products/${productId}`),
+            ]);
 
-        // ✅ 메시지 전송
-        socket.emit("send_message", {
-            receiverId,
-            productId,
-            text: inputText,
-        });
+            if (messagesData.ok) {
+                setMessages(messagesData.messages);
+                if (messagesData.messages.length > 0) {
+                    const firstMessage = messagesData.messages[0];
+                    const other =
+                        firstMessage.senderId._id === user?._id
+                            ? firstMessage.receiverId
+                            : firstMessage.senderId;
+                    setOtherUser(other);
+                }
+            }
 
-        setInputText("");
+            if (productData.ok) {
+                setProduct(productData.product);
+            }
+        } catch (err) {
+            console.error("채팅 데이터 조회 실패:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (!user || !receiverId || !productId) {
-        return <div className="container py-10 text-center">로딩 중...</div>;
+    const initializeSocket = () => {
+        const socketURL =
+            import.meta.env.VITE_SOCKET_URL ||
+            "https://api.palpalshop.shop";
+
+        socketRef.current = io(socketURL, {
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 5,
+        });
+
+        socketRef.current.on("connect", () => {
+            console.log("WebSocket 연결됨");
+            if (user?._id) {
+                socketRef.current?.emit("join", user._id);
+            }
+        });
+
+        socketRef.current.on("receive_message", (data: Message) => {
+            if (
+                data.productId === productId &&
+                ((data.senderId._id === receiverId && data.receiverId._id === user?._id) ||
+                    (data.senderId._id === user?._id && data.receiverId._id === receiverId))
+            ) {
+                setMessages((prev) => [...prev, data]);
+            }
+        });
+
+        socketRef.current.on("disconnect", () => {
+            console.log("WebSocket 연결 해제됨");
+        });
+    };
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!messageText.trim()) return;
+
+        setSending(true);
+        try {
+            await api("/messages/send", {
+                method: "POST",
+                body: JSON.stringify({
+                    receiverId,
+                    productId,
+                    text: messageText,
+                }),
+            });
+
+            socketRef.current?.emit("send_message", {
+                receiverId,
+                productId,
+                text: messageText,
+            });
+
+            setMessageText("");
+        } catch (err) {
+            console.error("메시지 전송 실패:", err);
+        } finally {
+            setSending(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <p className="text-gray-500">로딩 중...</p>
+            </div>
+        );
     }
 
     return (
-        <div className="flex flex-col h-screen max-w-2xl mx-auto bg-white">
+        <div className="flex flex-col h-screen pb-20 bg-white md:pb-0">
             {/* 헤더 */}
-            <div className="p-4 border-b">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="text-gray-600 hover:text-gray-900"
-                >
-                    ← 뒤로가기
-                </button>
+            <div className="sticky top-0 z-10 bg-white border-b">
+                <div className="flex items-center max-w-2xl gap-3 px-4 py-4 mx-auto">
+                    <button
+                        onClick={() => navigate("/chats")}
+                        className="p-2 text-2xl rounded-lg hover:bg-gray-100"
+                    >
+                        ←
+                    </button>
+
+                    {product && (
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-600 truncate">
+                                {product.title}
+                            </p>
+                            <p className="text-lg font-bold text-gray-900">
+                                {otherUser?.nickname || "사용자"}
+                            </p>
+                            <p className="text-sm font-semibold text-blue-600">
+                                ₩{product.price?.toLocaleString()}
+                            </p>
+                        </div>
+                    )}
+
+                    <img
+                        src={product?.images[0] || "/placeholder.png"}
+                        alt="상품"
+                        className="object-cover w-12 h-12 bg-gray-200 rounded-lg"
+                    />
+                </div>
             </div>
 
             {/* 메시지 영역 */}
-            <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-                {loading ? (
-                    <p className="text-center text-gray-500">로딩 중...</p>
-                ) : messages.length === 0 ? (
-                    <p className="text-center text-gray-500">대화를 시작하세요</p>
-                ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg._id}
-                            className={`flex ${msg.senderId === user._id ? "justify-end" : "justify-start"
-                                }`}
-                        >
+            <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+                {messages.length > 0 ? (
+                    messages.map((message) => {
+                        const isMyMessage = message.senderId._id === user?._id;
+
+                        return (
                             <div
-                                className={`max-w-xs px-4 py-2 rounded-lg ${msg.senderId === user._id
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-900"
-                                    }`}
+                                key={message._id}
+                                className={`flex ${isMyMessage ? "justify-end" : "justify-start"}`}
                             >
-                                <p>{msg.text}</p>
-                                <p className="mt-1 text-xs opacity-70">
-                                    {new Date(msg.createdAt).toLocaleTimeString()}
-                                </p>
+                                <div
+                                    className={`max-w-xs px-4 py-2 rounded-lg ${isMyMessage
+                                            ? "bg-blue-500 text-white rounded-br-none"
+                                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                                        }`}
+                                >
+                                    <p className="text-sm break-words">{message.text}</p>
+                                    <p
+                                        className={`text-xs mt-1 ${isMyMessage ? "text-blue-100" : "text-gray-500"
+                                            }`}
+                                    >
+                                        {new Date(message.createdAt).toLocaleTimeString("ko-KR", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-500">채팅을 시작하세요</p>
+                    </div>
                 )}
+                <div ref={messagesEndRef} />
             </div>
 
-            {/* 입력 영역 */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t">
-                <div className="flex gap-2">
+            {/* 메시지 입력 */}
+            <div className="sticky bottom-0 px-4 py-3 bg-white border-t">
+                <form onSubmit={handleSendMessage} className="flex max-w-2xl gap-2 mx-auto">
                     <input
                         type="text"
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder="메시지를 입력하세요..."
-                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        placeholder="메시지를 입력하세요"
+                        className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={sending}
                     />
                     <button
                         type="submit"
-                        disabled={!inputText.trim()}
-                        className="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                        disabled={!messageText.trim() || sending}
+                        className="px-6 py-2 font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-50"
                     >
-                        전송
+                        {sending ? "전송 중..." : "전송"}
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }

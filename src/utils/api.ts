@@ -1,7 +1,7 @@
 const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
-    const token = sessionStorage.getItem("token"); // ✅ localStorage → sessionStorage
+    const token = sessionStorage.getItem("token"); // localStorage → sessionStorage
 
     const res = await fetch(`${API_BASE}${path}`, {
         headers: {

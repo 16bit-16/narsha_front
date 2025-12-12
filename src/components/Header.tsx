@@ -8,7 +8,7 @@ export default function Header() {
   const { user, loading, logout } = useAuth();
   const [searchParams] = useSearchParams();
 
-  // ✅ URL에서 현재 검색어 가져오기
+  // URL에서 현재 검색어 가져오기
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("q") || ""
   );
@@ -21,13 +21,21 @@ export default function Header() {
     }
   };
 
+  const goChat = () => {
+    if (user) {
+      navigate("/chats");
+    } else {
+      navigate("/login", { state: { from: "/chatlist" } });
+    }
+  }
+
   const [isVisible, setIsVisible] = useState(false);
 
   const mydetail = () => {
     setIsVisible(!isVisible);
   }
 
-  // ✅ 검색 실행
+  // 검색 실행
   const handleSearch = () => {
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
@@ -36,7 +44,7 @@ export default function Header() {
     navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
-  // ✅ Enter 키로 검색
+  // Enter 키로 검색
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
@@ -54,7 +62,7 @@ export default function Header() {
           <img src="/logo_black.png" className="h-16" alt="로고" />
         </button>
 
-        {/* ✅ 검색창 */}
+        {/* 검색창 */}
         <div className="hidden flex-1 max-w-xl ml-6 rounded-md bg-[#efefef] px-4 md:flex">
           <div className="flex items-center justify-center">
             <img src="/search.svg" alt="" className="w-3 h-3 opacity-40" />
@@ -81,6 +89,16 @@ export default function Header() {
               <img src="https://cdn-icons-png.flaticon.com/512/3737/3737822.png" alt="" className="w-4 h-4" />
             </div>
             <p className="pl-1">판매하기</p>
+          </button>
+          <button
+            onClick={goChat}
+            className="flex items-center justify-center pr-2 duration-150 text-md hover:font-semibold"
+            title="채팅"
+          >
+            <div className="relative">
+              <img src="https://cdn-icons-png.flaticon.com/512/3737/3737822.png" alt="" className="w-4 h-4" />
+            </div>
+            <p className="pl-1">채팅</p>
           </button>
           <div className="w-[1px] h-4 bg-gray-800"></div>
           {loading ? (

@@ -161,7 +161,7 @@ export default function ProductNew() {
       method: "POST",
       credentials: "include",
       headers: {
-        // ✅ Content-Type 제거! (FormData는 자동 설정)
+        // Content-Type 제거! (FormData는 자동 설정)
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: fd,
@@ -188,7 +188,7 @@ export default function ProductNew() {
     try {
       const urls = await uploadImages(selFiles.map((s) => s.file));
 
-      // ✅ data 변수 제거 (사용 안 하니까)
+      // data 변수 제거 (사용 안 하니까)
       await api<{ ok: true; product: any }>("/products", {
         method: "POST",
         body: JSON.stringify({
@@ -279,7 +279,7 @@ export default function ProductNew() {
       });
 
       if (aiRes.ok && aiRes.data) {
-        // ✅ AI가 생성한 데이터로 폼 채우기
+        // AI가 생성한 데이터로 폼 채우기
         setTitle(aiRes.data.title || "");
         setQuality(aiRes.data.quality || "상");
         setBrand(aiRes.data.brand || "");

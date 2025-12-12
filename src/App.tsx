@@ -16,16 +16,17 @@ import FindPw from "./pages/FindPw";
 import Tos from "./pages/TOS";
 import Privacy from "./pages/PrivacyPolicy"
 import EditProfile from "./pages/EditProfile";
-import Chat from "./pages/Chat";
 import Category from "./pages/Category";
+import ChatList from "./pages/Chatlist";
+import Chat from "./pages/Chat";
 
-const HIDE_LAYOUT_PATHS = ["/login", "/signup","/find"] as const;
+const HIDE_LAYOUT_PATHS = ["/login", "/signup", "/find"] as const;
 console.log(import.meta.env.VITE_KAKAOMAP_KEY);
 
 // 특정 경로에서는 Header/Footer 숨기기
 const shouldHideLayout = (pathname: string) =>
   HIDE_LAYOUT_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
-  
+
 export default function App() {
   const { pathname } = useLocation();
   const hideLayout = shouldHideLayout(pathname);
@@ -52,8 +53,10 @@ export default function App() {
             <Route path="/tos" element={<Tos />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/editprofile" element={<EditProfile />} />
+            <Route path="/chats" element={<ChatList />} />
             <Route path="/chat/:receiverId/:productId" element={<Chat />} />
-            
+
+
             {/* 헤더 선택자 */}
             <Route path="/category" element={<Category />} />
 
