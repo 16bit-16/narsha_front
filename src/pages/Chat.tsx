@@ -134,15 +134,7 @@ export default function Chat() {
 
         setSending(true);
         try {
-            await api("/messages/send", {
-                method: "POST",
-                body: JSON.stringify({
-                    receiverId,
-                    productId,
-                    text: messageText,
-                }),
-            });
-
+            // API 호출 제거 - WebSocket으로만 전송
             socketRef.current?.emit("send_message", {
                 receiverId,
                 productId,
@@ -212,8 +204,8 @@ export default function Chat() {
                             >
                                 <div
                                     className={`max-w-xs px-4 py-2 rounded-lg ${isMyMessage
-                                            ? "bg-blue-500 text-white rounded-br-none"
-                                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                                        ? "bg-blue-500 text-white rounded-br-none"
+                                        : "bg-gray-100 text-gray-900 rounded-bl-none"
                                         }`}
                                 >
                                     <p className="text-sm break-words">{message.text}</p>
