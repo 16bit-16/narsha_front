@@ -90,6 +90,7 @@ export default function Header() {
             </div>
             <p className="pl-1">판매하기</p>
           </button>
+          <div className="w-[1px] h-4 bg-gray-800"></div>
           <button
             onClick={goChat}
             className="flex items-center justify-center pr-2 duration-150 text-md hover:font-semibold"

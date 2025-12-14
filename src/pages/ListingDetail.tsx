@@ -1,3 +1,5 @@
+// src/pages/ListingDetail.tsx
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ImageCarousel from "../components/ImageCarousel";
@@ -17,9 +19,7 @@ export default function ListingDetail() {
   const [err, setErr] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
 
-  // 좋아요 상태 관리
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
   const [likeBusy, setLikeBusy] = useState(false);
 
   useEffect(() => {
@@ -30,17 +30,13 @@ export default function ListingDetail() {
       setLoading(true);
       setErr(null);
       try {
-        // api 함수 사용
         const pJson = await api<{ ok: true; product: Product; isLiked: boolean }>(
           `/products/${id}`
         );
         const item: Product = pJson.product;
 
-        // 좋아요 정보 초기화
         setIsLiked(pJson.isLiked || false);
-        setLikeCount(item.likeCount || 0);
 
-        // api 함수 사용
         const lJson = await api<{ ok: true; products: Product[] }>("/products");
         const list: Product[] = lJson.products || [];
 
@@ -61,35 +57,23 @@ export default function ListingDetail() {
     };
   }, [id]);
 
-  // 좋아요 토글 함수
   const handleLike = async () => {
     if (!id || likeBusy) return;
 
     setLikeBusy(true);
 
-    // 낙관적 업데이트 (즉시 UI 반영)
     const prevLiked = isLiked;
-    const prevCount = likeCount;
     setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
 
     try {
-      // api 함수 사용
-      const data = await api<{
+      await api<{
         ok: true;
         isLiked: boolean;
-        likeCount: number
       }>(`/products/${id}/like`, {
         method: "POST",
       });
-
-      // 서버 응답으로 최종 확정
-      setIsLiked(data.isLiked);
-      setLikeCount(data.likeCount);
     } catch (e: any) {
-      // 실패 시 이전 상태로 롤백
       setIsLiked(prevLiked);
-      setLikeCount(prevCount);
       alert(e.message || "로그인이 필요합니다.");
     } finally {
       setLikeBusy(false);
@@ -119,7 +103,7 @@ export default function ListingDetail() {
       <div className="py-6">
         {showMap && product.lat && product.lng && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="relative w-1/2 p-10 bg-white rounded-lg h-100">
+            <div className="relative w-4/5 p-10 bg-white rounded-lg h-4/5">
               <button
                 className="absolute text-xl text-zinc-500 top-2 right-4"
                 onClick={() => setShowMap(false)}
@@ -139,19 +123,19 @@ export default function ListingDetail() {
           </div>
         )}
 
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.5fr_0.5fr]">
-          {/* 판매완료 오버레이 */}
-          {product.status === "sold" && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="text-center">
-                <h2 className="mb-2 text-2xl font-bold text-white">판매완료된 상품입니다.</h2>
-                <p className="pb-2 text-gray-300">더 이상 구매할 수 없습니다.</p>
-                <button onClick={() => { navigate("/") }} className="px-4 py-1 text-white bg-gray-800 rounded-lg">돌아가기</button>
-              </div>
+        {product.status === "sold" && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="text-center">
+              <h2 className="mb-2 text-2xl font-bold text-white">판매완료된 상품입니다.</h2>
+              <p className="pb-2 text-gray-300">더 이상 구매할 수 없습니다.</p>
+              <button onClick={() => { navigate("/") }} className="px-4 py-1 text-white bg-gray-800 rounded-lg">돌아가기</button>
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.5fr_0.5fr]">
           <ImageCarousel images={images} />
-          <section className="flex flex-col justify-between">
+          <section className="flex flex-col gap-2">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <img src={product.seller.profileImage} alt="" className="rounded-full size-10" />
@@ -166,12 +150,7 @@ export default function ListingDetail() {
               </div>
 
               <div>
-                <div className="flex justify-between">
-                  <h1 className="text-xl font-semibold">{product.title}</h1>
-                  <button className="flex px-3 py-2 text-lg text-gray-600 md:hidden hover:bg-zinc-50" title="공유하기" onClick={() => { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!") }}>
-                    ↗
-                  </button>
-                </div>
+                <h1 className="text-xl font-semibold">{product.title}</h1>
                 <div className="mt-1 text-3xl font-bold">
                   {Number(product.price).toLocaleString()}원
                 </div>
@@ -185,16 +164,20 @@ export default function ListingDetail() {
                     : ""}
                 </div>
               </div>
-
-              <div className="pb-4 leading-6 whitespace-pre-line text-zinc-700 md:pb-0">
-                {product.description?.trim()
-                  ? product.description
-                  : "판매자가 설명을 입력하지 않았습니다."}
-              </div>
             </div>
-
-            {/* 좋아요 버튼 업데이트 */}
-            <div className="flex items-center gap-3 pt-6">
+            {product.lat && product.lng && (
+              <>
+                <div className="relative grow">
+                  <button onClick={() => setShowMap(true)} className="absolute z-10 text-sm top-2 right-2 text-zinc-500">자세히 보기</button>
+                  <Map
+                    onSelect={() => { }}
+                    center={{ lat: product.lat, lng: product.lng }}
+                    marker={{ lat: product.lat, lng: product.lng }}
+                  />
+                </div>
+              </>
+            )}
+            <div className="flex items-center max-w-4xl gap-3">
               <button
                 onClick={handleLike}
                 disabled={likeBusy}
@@ -202,23 +185,27 @@ export default function ListingDetail() {
                   ? "text-red-500 hover:text-red-600"
                   : "text-gray-600 hover:text-red-500"
                   } ${likeBusy ? "opacity-50 cursor-not-allowed" : ""}`}
-                title={`좋아요 ${likeCount}개`}
               >
                 {isLiked ? "♥" : "♡"}
               </button>
 
-              <button className="hidden px-3 py-2 text-lg text-gray-600 md:flex hover:bg-zinc-50" title="공유하기" onClick={() => { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!") }}>
+              <button className="px-3 py-2 text-lg text-gray-600 hover:bg-zinc-50" title="공유하기" onClick={() => { navigator.clipboard.writeText(window.location.href); alert("링크가 복사되었습니다!") }}>
                 ↗
               </button>
               <button
                 onClick={() => navigate(`/chat/${product.seller._id}/${product._id}`)}
-                className="h-10 px-16 text-sm font-semibold border border-gray-800 rounded w-80 hover:bg-zinc-50">
+                className="w-full h-10 px-16 text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50">
                 채팅하기
               </button>
             </div>
           </section>
-
           <DetailSidebar product={product} />
+        </div>
+
+        <div className="max-w-4xl mt-10 leading-6 whitespace-pre-line text-zinc-700">
+          {product.description?.trim()
+            ? product.description
+            : "판매자가 설명을 입력하지 않았습니다."}
         </div>
 
         <div className="mt-10">

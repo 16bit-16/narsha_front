@@ -6,7 +6,7 @@ interface Props {
 
 export default function DetailSidebar({ product }: Props) {
   return (
-    <aside className="p-4 px-5 text-sm text-gray-700 card ">
+    <aside className="p-4 px-5 text-sm text-gray-700 card">
       <div className="grid w-full space-y-3 grid-rows md:grid-cols">
         <div className="flex flex-col items-center justify-between">
           <span className="text-gray-500">브랜드</span>

@@ -1,3 +1,5 @@
+// src/pages/ProductNew.tsx
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Map from "../components/Map";
@@ -30,7 +32,8 @@ const QC = [
 ];
 
 export default function ProductNew() {
-  const [aiLoading, setAiLoading] = useState(false); // AI 로딩 상태
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAbortController, setAiAbortController] = useState<AbortController | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priceRaw, setPriceRaw] = useState<string>("");
@@ -82,12 +85,11 @@ export default function ProductNew() {
       }
 
       if (files.length > 0) {
-        e.preventDefault(); // 기본 붙여넣기 동작 방지
+        e.preventDefault();
         addFiles(files);
       }
     };
 
-    // 전역 이벤트 리스너 등록
     window.addEventListener('paste', handlePaste);
 
     return () => {
@@ -114,10 +116,6 @@ export default function ProductNew() {
       id: `${f.name}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     }));
     setSelFiles((prev) => [...prev, ...mapped]);
-    if (mapped.length > 0) {
-      analyzeImageWithAI(mapped[0]);
-    }
-
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +123,6 @@ export default function ProductNew() {
     e.currentTarget.value = "";
   };
 
-  // 드래그&드롭 시각 피드백
   useEffect(() => {
     const el = dropRef.current;
     if (!el) return;
@@ -161,7 +158,6 @@ export default function ProductNew() {
       method: "POST",
       credentials: "include",
       headers: {
-        // Content-Type 제거! (FormData는 자동 설정)
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: fd,
@@ -172,8 +168,6 @@ export default function ProductNew() {
       throw new Error(data.error || "이미지 업로드 실패");
     return data.urls as string[];
   }
-
-  // pages/ProductNew.tsx - onSubmit 함수
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,7 +182,6 @@ export default function ProductNew() {
     try {
       const urls = await uploadImages(selFiles.map((s) => s.file));
 
-      // data 변수 제거 (사용 안 하니까)
       await api<{ ok: true; product: any }>("/products", {
         method: "POST",
         body: JSON.stringify({
@@ -234,12 +227,11 @@ export default function ProductNew() {
   const titleError = touched.title && !title.trim();
   const priceError = touched.price && price <= 0;
 
-  const analyzeImageWithAI = async (selFile: SelFile) => {
+  const analyzeImageWithAI = async (selFile: SelFile, signal?: AbortSignal) => {
     setAiLoading(true);
     setErrMsg(null);
 
     try {
-      // 1️⃣ 이미지를 먼저 API에 업로드해서 URL 얻기
       const fd = new FormData();
       fd.append("files", selFile.file);
 
@@ -253,6 +245,7 @@ export default function ProductNew() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: fd,
+        signal,
       });
 
       const uploadData = await uploadRes.json();
@@ -263,8 +256,6 @@ export default function ProductNew() {
       const imageUrl = uploadData.urls?.[0];
       if (!imageUrl) throw new Error("이미지 URL을 받지 못했습니다");
 
-      // 2️⃣ AI로 설명문 생성
-      console.log("AI가 설명문을 작성 중입니다...");
       const aiRes = await api<{
         ok: true;
         data: {
@@ -276,23 +267,44 @@ export default function ProductNew() {
       }>("/ai/generate-description", {
         method: "POST",
         body: JSON.stringify({ imageUrl }),
+        signal,
       });
 
       if (aiRes.ok && aiRes.data) {
-        // AI가 생성한 데이터로 폼 채우기
         setTitle(aiRes.data.title || "");
         setQuality(aiRes.data.quality || "상");
         setBrand(aiRes.data.brand || "");
         setDescription(aiRes.data.description || "");
 
-        console.log("AI 설명문 생성 완료!");
         setErrMsg(null);
       }
     } catch (err: any) {
-      console.error("AI 분석 실패:", err);
-      setErrMsg(err.message || "AI 설명문 생성 실패");
+      if (err.name === "AbortError") {
+      } else {
+        setErrMsg(err.message || "AI 설명문 생성 실패");
+      }
     } finally {
       setAiLoading(false);
+      setAiAbortController(null);
+    }
+  };
+
+  const handleAIAnalyze = async () => {
+    if (selFiles.length === 0) {
+      setErrMsg("먼저 이미지를 업로드하세요");
+      return;
+    }
+
+    const controller = new AbortController();
+    setAiAbortController(controller);
+    await analyzeImageWithAI(selFiles[0], controller.signal);
+  };
+
+  const handleCancelAI = () => {
+    if (aiAbortController) {
+      aiAbortController.abort();
+      setAiLoading(false);
+      setAiAbortController(null);
     }
   };
 
@@ -341,23 +353,46 @@ export default function ProductNew() {
             </div>
 
             {selFiles.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 mt-3 sm:grid-cols-4 md:grid-cols-5">
-                {selFiles.map((s) => (
-                  <div key={s.id} className="thumb">
-                    <img src={s.preview} className="thumb-img" />
+              <>
+                <div className="grid grid-cols-3 gap-3 mt-3 sm:grid-cols-4 md:grid-cols-5">
+                  {selFiles.map((s) => (
+                    <div key={s.id} className="thumb">
+                      <img src={s.preview} className="thumb-img" />
+                      <button
+                        type="button"
+                        className="thumb-del"
+                        onClick={() =>
+                          setSelFiles((prev) => prev.filter((x) => x.id !== s.id))
+                        }
+                        aria-label="이미지 제거"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={handleAIAnalyze}
+                    disabled={aiLoading}
+                    className="px-4 py-2 font-semibold text-white bg-gray-500 rounded hover:bg-gray-600 disabled:opacity-50"
+                  >
+                    {aiLoading ? "분석 중..." : "AI 자동 분석"}
+                  </button>
+
+                  {aiLoading && (
                     <button
                       type="button"
-                      className="thumb-del"
-                      onClick={() =>
-                        setSelFiles((prev) => prev.filter((x) => x.id !== s.id))
-                      }
-                      aria-label="이미지 제거"
+                      onClick={handleCancelAI}
+                      className="px-4 py-2 font-semibold text-white bg-red-500 rounded hover:bg-red-600"
                     >
-                      삭제
+                      취소
                     </button>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
@@ -371,6 +406,7 @@ export default function ProductNew() {
               className={titleError ? "input-error" : "input"}
               placeholder="예) 중고 책 · 상급 · 포장만 뜯은 상태"
               maxLength={60}
+              disabled={aiLoading}
             />
             <p className="form-hint">
               최대 60자. 상품 핵심이 드러나게 적어주세요.
@@ -386,13 +422,14 @@ export default function ProductNew() {
               className="textarea"
               rows={6}
               placeholder={`상세 상태(사용감/하자), 구성품, 교환/환불 안내 등\n예) 거의 새것, 책갈피 사은품 포함`}
+              disabled={aiLoading}
             />
             <div className="form-counter">{description.length}/1000</div>
           </div>
 
           {/* 디테일 사이드바 */}
           <div>
-            <label className="form-label">설명</label>
+            <label className="form-label">상품 정보</label>
             <div className="grid grid-cols-5 gap-4">
               <div className="p-4 space-y-2 border rounded-lg">
                 <p>브랜드</p>
@@ -402,6 +439,7 @@ export default function ProductNew() {
                   onChange={(e) => setBrand(e.target.value)}
                   className="input"
                   placeholder="예) 삼성전자"
+                  disabled={aiLoading}
                 />
               </div>
 
@@ -411,7 +449,8 @@ export default function ProductNew() {
                 <select
                   value={Quality}
                   onChange={e => setQuality(e.target.value)}
-                  className="input" // 스타일 추가
+                  className="input"
+                  disabled={aiLoading}
                 >
                   <option value="">제품상태 선택</option>
                   {QC.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
@@ -426,6 +465,7 @@ export default function ProductNew() {
                   className="justify-center h-12 p-4 border rounded-lg"
                   value={BuyDate}
                   onChange={(e) => setBuyDate(e.target.value)}
+                  disabled={aiLoading}
                 />
               </div>
 
@@ -437,6 +477,7 @@ export default function ProductNew() {
                   onChange={(e) => setTrade(e.target.value)}
                   className="input"
                   placeholder="예) 직거래"
+                  disabled={aiLoading}
                 />
               </div>
 
@@ -448,11 +489,11 @@ export default function ProductNew() {
                   onChange={(e) => setDeliveryFee(e.target.value)}
                   className="input"
                   placeholder="예) 배송비 별도"
+                  disabled={aiLoading}
                 />
               </div>
             </div>
           </div>
-
 
           {/* 가격 + 카테고리 */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -465,6 +506,7 @@ export default function ProductNew() {
                 onBlur={() => setTouched((s) => ({ ...s, price: true }))}
                 className={priceError ? "input-error" : "input"}
                 placeholder="예) 12,000"
+                disabled={aiLoading}
               />
               <p className="form-hint">
                 숫자만 입력하면 자동으로 3자리 콤마가 적용돼요.
@@ -477,6 +519,7 @@ export default function ProductNew() {
                 className="select"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
+                disabled={aiLoading}
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -491,13 +534,15 @@ export default function ProductNew() {
           </div>
 
           {/* 위치 */}
-          <Map
-            onSelect={(info) => {
-              setLocation(info.address); // 주소
-              setSelectedLat(info.lat);  // 위도
-              setSelectedLng(info.lng);  // 경도
-            }}
-          />
+          <div className="h-96">
+            <Map
+              onSelect={(info) => {
+                setLocation(info.address);
+                setSelectedLat(info.lat);
+                setSelectedLng(info.lng);
+              }}
+            />
+          </div>
 
           <div>
             <label className="form-label">거래 지역</label>
@@ -506,6 +551,7 @@ export default function ProductNew() {
               onChange={(e) => setLocation(e.target.value)}
               className="input"
               placeholder="예) 대구 수성구"
+              disabled={aiLoading}
             />
             <p className="form-hint">
               직거래를 원하시면 동/구 단위로 적어주세요. (선택)

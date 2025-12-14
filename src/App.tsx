@@ -21,7 +21,6 @@ import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
 
 const HIDE_LAYOUT_PATHS = ["/login", "/signup", "/find"] as const;
-console.log(import.meta.env.VITE_KAKAOMAP_KEY);
 
 // 특정 경로에서는 Header/Footer 숨기기
 const shouldHideLayout = (pathname: string) =>

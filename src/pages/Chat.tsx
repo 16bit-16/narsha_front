@@ -90,36 +90,95 @@ export default function Chat() {
     };
 
     const initializeSocket = () => {
-        const socketURL =
-            import.meta.env.VITE_SOCKET_URL ||
-            "https://api.palpalshop.shop";
+        const getSocketURL = () => {
+            if (import.meta.env.VITE_SOCKET_URL) {
+                return import.meta.env.VITE_SOCKET_URL;
+            }
+            
+            if (window.location.hostname === "localhost") {
+                return "http://localhost:4000";
+            }
+            
+            return "https://api.palpalshop.shop";
+        };
+
+        const socketURL = getSocketURL();
+        console.log("Socket 연결 시도:", socketURL);
 
         socketRef.current = io(socketURL, {
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
             reconnectionAttempts: 5,
+            transports: ["websocket", "polling"],
         });
 
         socketRef.current.on("connect", () => {
-            console.log("WebSocket 연결됨");
+            console.log("Socket 연결 성공:", socketRef.current?.id);
             if (user?._id) {
                 socketRef.current?.emit("join", user._id);
+                console.log("join 이벤트 발송:", user._id);
             }
         });
 
-        socketRef.current.on("receive_message", (data: Message) => {
-            if (
-                data.productId === productId &&
-                ((data.senderId._id === receiverId && data.receiverId._id === user?._id) ||
-                    (data.senderId._id === user?._id && data.receiverId._id === receiverId))
-            ) {
-                setMessages((prev) => [...prev, data]);
+        socketRef.current.on("message_sent", (data: any) => {
+            console.log("message_sent 수신:", data);
+            const newMessage: Message = {
+                _id: data._id,
+                roomId: `${user?._id}-${receiverId}`.split("").sort().join("-"),
+                senderId: {
+                    _id: user?._id || "",
+                    nickname: user?.nickname || "",
+                    profileImage: user?.profileImage,
+                },
+                receiverId: {
+                    _id: receiverId || "",
+                    nickname: otherUser?.nickname || "",
+                    profileImage: otherUser?.profileImage,
+                },
+                productId: productId || "",
+                text: data.text,
+                read: false,
+                createdAt: data.createdAt,
+            };
+            setMessages((prev) => [...prev, newMessage]);
+        });
+
+        socketRef.current.on("receive_message", (data: any) => {
+            console.log("receive_message 수신:", data);
+            if (data.productId === productId) {
+                const newMessage: Message = {
+                    _id: data._id,
+                    roomId: `${data.senderId}-${data.receiverId}`.split("").sort().join("-"),
+                    senderId: {
+                        _id: data.senderId,
+                        nickname: otherUser?.nickname || "",
+                        profileImage: otherUser?.profileImage,
+                    },
+                    receiverId: {
+                        _id: data.receiverId,
+                        nickname: user?.nickname || "",
+                        profileImage: user?.profileImage,
+                    },
+                    productId: data.productId,
+                    text: data.text,
+                    read: false,
+                    createdAt: data.createdAt,
+                };
+                setMessages((prev) => [...prev, newMessage]);
             }
+        });
+
+        socketRef.current.on("error", (error: any) => {
+            console.error("Socket 에러:", error);
         });
 
         socketRef.current.on("disconnect", () => {
-            console.log("WebSocket 연결 해제됨");
+            console.log("Socket 연결 해제");
+        });
+
+        socketRef.current.on("connect_error", (error: any) => {
+            console.error("Socket 연결 에러:", error);
         });
     };
 
@@ -130,11 +189,16 @@ export default function Chat() {
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!messageText.trim()) return;
+        if (!messageText.trim() || !socketRef.current?.connected) return;
 
         setSending(true);
         try {
-            // API 호출 제거 - WebSocket으로만 전송
+            console.log("메시지 전송:", {
+                receiverId,
+                productId,
+                text: messageText,
+            });
+
             socketRef.current?.emit("send_message", {
                 receiverId,
                 productId,
@@ -159,7 +223,6 @@ export default function Chat() {
 
     return (
         <div className="flex flex-col h-screen pb-20 bg-white md:pb-0">
-            {/* 헤더 */}
             <div className="sticky top-0 z-10 bg-white border-b">
                 <div className="flex items-center max-w-2xl gap-3 px-4 py-4 mx-auto">
                     <button
@@ -191,7 +254,6 @@ export default function Chat() {
                 </div>
             </div>
 
-            {/* 메시지 영역 */}
             <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
                 {messages.length > 0 ? (
                     messages.map((message) => {
@@ -230,7 +292,6 @@ export default function Chat() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* 메시지 입력 */}
             <div className="sticky bottom-0 px-4 py-3 bg-white border-t">
                 <form onSubmit={handleSendMessage} className="flex max-w-2xl gap-2 mx-auto">
                     <input
@@ -239,11 +300,11 @@ export default function Chat() {
                         onChange={(e) => setMessageText(e.target.value)}
                         placeholder="메시지를 입력하세요"
                         className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled={sending}
+                        disabled={sending || !socketRef.current?.connected}
                     />
                     <button
                         type="submit"
-                        disabled={!messageText.trim() || sending}
+                        disabled={!messageText.trim() || sending || !socketRef.current?.connected}
                         className="px-6 py-2 font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-50"
                     >
                         {sending ? "전송 중..." : "전송"}

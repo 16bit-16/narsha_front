@@ -106,7 +106,7 @@ export default function Map({
         <KakaoMap
             center={center}
             onClick={handleClick}
-            className="w-full border rounded-md h-96"
+            className="w-full h-full border rounded-md"
             level={3}
             draggable={true}
             zoomable={true}
