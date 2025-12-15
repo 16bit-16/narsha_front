@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { Product } from "../data/mockProducts";
 
 interface Props {
@@ -6,10 +6,16 @@ interface Props {
 }
 
 export default function ProductCard({ item }: Props) {
+  const location = useLocation();
   const imageSrc = item.images?.[0] || "/placeholder.png";
   const dateText = item.createdAt
     ? new Date(item.createdAt).toLocaleDateString()
     : "";
+
+  const isUserPage = location.pathname.startsWith("/user");
+  const truncatedTitle = isUserPage && item.title.length > 14
+    ? item.title.slice(0, 12) + "..."
+    : item.title;
 
   return (
     <Link
@@ -40,7 +46,7 @@ export default function ProductCard({ item }: Props) {
         />
       </div>
       <div className="py-3">
-        <h3 className="text-sm line-clamp-1">{item.title}</h3>
+        <h3 className="text-sm line-clamp-1">{truncatedTitle}</h3>
         <p className="mt-1 font-semibold">
           {Number(item.price).toLocaleString()}원
         </p>

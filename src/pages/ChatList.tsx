@@ -81,7 +81,7 @@ export default function ChatList() {
     return (
         <div className="min-h-screen pb-20 bg-white md:pb-0">
             {/* 헤더 */}
-            <div className="sticky top-0 z-10 bg-white border-b">
+            <div className="sticky top-0 bg-white border-b">
                 <div className="max-w-2xl px-4 py-4 mx-auto">
                     <h1 className="text-2xl font-bold">채팅</h1>
                     <p className="mt-1 text-xs text-gray-500">

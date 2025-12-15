@@ -114,7 +114,7 @@ export default function Header() {
                   <img src="https://cdn-icons-png.flaticon.com/512/456/456283.png" alt="" className="w-4 h-4" />
                 </div>
                 <p className="pl-1">마이</p>
-                <div id="mybtn_detail" className="absolute flex-col hidden gap-2 p-4 text-sm bg-white border rounded-lg top-16" style={{ display: isVisible ? "flex" : "none" }}>
+                <div id="mybtn_detail" className="absolute z-50 flex-col hidden gap-2 p-4 text-sm bg-white border rounded-lg top-16" style={{ display: isVisible ? "flex" : "none" }}>
                   <button onClick={() => navigate("/user")}>마이페이지</button>
                   <hr />
                   <button 
