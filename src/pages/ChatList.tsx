@@ -45,8 +45,8 @@ export default function ChatList() {
     return (
         <div className="min-h-screen pb-20 bg-white md:pb-0">
             {/* 헤더 */}
-            <div className="sticky top-0 z-10 bg-white border-b">
-                <div className="max-w-2xl px-4 py-4 mx-auto">
+            <div className="sticky top-0 bg-white border-b">
+                <div className="w-full py-4 ">
                     <h1 className="text-2xl font-bold">채팅</h1>
                     <p className="mt-1 text-xs text-gray-500">
                         {uniqueChatArray.length}개의 채팅
@@ -55,7 +55,7 @@ export default function ChatList() {
             </div>
 
             {/* 채팅 목록 */}
-            <div className="max-w-2xl mx-auto">
+            <div className="w-full">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <p className="text-gray-500">로딩 중...</p>

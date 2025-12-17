@@ -20,7 +20,7 @@ import Category from "./pages/Category";
 import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
 
-const HIDE_LAYOUT_PATHS = ["/login", "/signup", "/find"] as const;
+const HIDE_LAYOUT_PATHS = ["/login", "/signup", "/find", "/chat"] as const;
 
 // 특정 경로에서는 Header/Footer 숨기기
 const shouldHideLayout = (pathname: string) =>

@@ -10,7 +10,8 @@ interface Message {
     sender: { _id: string; nickname: string; profileImage?: string };
     receiver: { _id: string; nickname: string; profileImage?: string };
     message: string;
-    product: string;  // 추가
+    image?: string;
+    product: string;
     createdAt: string;
 }
 
@@ -83,8 +84,8 @@ export function useChat(userId: string | undefined, productId: string | undefine
         });
     };
 
-    const sendMessage = async (message: string) => {
-        if (!message.trim() || !userId || !productId || !user?._id) {
+    const sendMessage = async (message: string, imageUrl?: string) => {
+        if ((!message.trim() && !imageUrl) || !userId || !productId || !user?._id) {
             console.warn("메시지 전송 불가");
             return;
         }
@@ -95,13 +96,15 @@ export function useChat(userId: string | undefined, productId: string | undefine
                 senderId: user._id,
                 receiverId: userId,
                 productId,
-                message,
+                message: message || "",
+                image: imageUrl,
             });
             socketRef.current?.emit("send_message", {
                 senderId: user._id,
                 receiverId: userId,
                 productId,
-                message,
+                message: message || "",
+                image: imageUrl,
             });
         } catch (err) {
             console.error("메시지 전송 실패:", err);
@@ -110,6 +113,7 @@ export function useChat(userId: string | undefined, productId: string | undefine
         }
     };
 
+    // 추가: useEffect
     useEffect(() => {
         loadMessages();
         initSocket();
