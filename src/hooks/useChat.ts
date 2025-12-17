@@ -32,7 +32,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
                 `/chat/${userId}/${productId}`
             );
             if (data.ok) {
-                console.log("메시지 로드 완료:", data.messages);
                 setMessages(data.messages);
             }
         } catch (err) {
@@ -44,7 +43,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
 
     const initSocket = () => {
         const socketURL = "https://api.palpalshop.shop";
-        console.log("소켓 연결 시도:", socketURL);
 
         socketRef.current = io(socketURL, {
             reconnection: true,
@@ -54,22 +52,18 @@ export function useChat(userId: string | undefined, productId: string | undefine
         });
 
         socketRef.current.on("connect", () => {
-            console.log("소켓 연결 성공:", socketRef.current?.id);
             if (user?._id) {
-                console.log("user_login 발송:", user._id);
                 socketRef.current?.emit("user_login", user._id);
             }
         });
 
         socketRef.current.on("receive_message", (data: Message) => {
-            console.log("receive_message 수신:", data);
             if (data.product === productId) {
                 setMessages((prev) => [...prev, data]);
             }
         });
 
         socketRef.current.on("message_sent", (data: Message) => {
-            console.log("message_sent 수신:", data);
             if (data.product === productId) {
                 setMessages((prev) => [...prev, data]);
             }
@@ -77,10 +71,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
 
         socketRef.current.on("error", (error: any) => {
             console.error("소켓 에러:", error);
-        });
-
-        socketRef.current.on("disconnect", () => {
-            console.log("소켓 연결 해제");
         });
     };
 
@@ -92,13 +82,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
 
         setSending(true);
         try {
-            console.log("send_message 발송:", {
-                senderId: user._id,
-                receiverId: userId,
-                productId,
-                message: message || "",
-                image: imageUrl,
-            });
             socketRef.current?.emit("send_message", {
                 senderId: user._id,
                 receiverId: userId,
@@ -113,7 +96,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
         }
     };
 
-    // 추가: useEffect
     useEffect(() => {
         loadMessages();
         initSocket();

@@ -28,7 +28,6 @@ export function useChatList() {
                 const validChats = data.chats.filter((chat) => {
                     return chat.product && chat.product._id;
                 });
-                console.log("📥 채팅 목록 로드 완료:", validChats);
                 setChatRooms(validChats);
             }
         } catch (err) {
