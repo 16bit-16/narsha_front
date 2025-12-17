@@ -10,6 +10,7 @@ interface Message {
     sender: { _id: string; nickname: string; profileImage?: string };
     receiver: { _id: string; nickname: string; profileImage?: string };
     message: string;
+    product: string;  // 추가
     createdAt: string;
 }
 
@@ -21,7 +22,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
 
-    // 메시지 로드
     const loadMessages = async () => {
         if (!userId || !productId) return;
 
@@ -31,7 +31,7 @@ export function useChat(userId: string | undefined, productId: string | undefine
                 `/chat/${userId}/${productId}`
             );
             if (data.ok) {
-                console.log("📥 메시지 로드 완료:", data.messages);
+                console.log("메시지 로드 완료:", data.messages);
                 setMessages(data.messages);
             }
         } catch (err) {
@@ -41,10 +41,9 @@ export function useChat(userId: string | undefined, productId: string | undefine
         }
     };
 
-    // Socket 초기화
     const initSocket = () => {
         const socketURL = "https://api.palpalshop.shop";
-        console.log("🔌 Socket 연결 시도:", socketURL);
+        console.log("소켓 연결 시도:", socketURL);
 
         socketRef.current = io(socketURL, {
             reconnection: true,
@@ -54,42 +53,45 @@ export function useChat(userId: string | undefined, productId: string | undefine
         });
 
         socketRef.current.on("connect", () => {
-            console.log("✅ Socket 연결 성공:", socketRef.current?.id);
+            console.log("소켓 연결 성공:", socketRef.current?.id);
             if (user?._id) {
-                console.log("👤 user_login 발송:", user._id);
+                console.log("user_login 발송:", user._id);
                 socketRef.current?.emit("user_login", user._id);
             }
         });
 
         socketRef.current.on("receive_message", (data: Message) => {
-            console.log("📨 receive_message 수신:", data);
-            setMessages((prev) => [...prev, data]);
+            console.log("receive_message 수신:", data);
+            if (data.product === productId) {
+                setMessages((prev) => [...prev, data]);
+            }
         });
 
         socketRef.current.on("message_sent", (data: Message) => {
-            console.log("✉️ message_sent 수신:", data);
-            setMessages((prev) => [...prev, data]);
+            console.log("message_sent 수신:", data);
+            if (data.product === productId) {
+                setMessages((prev) => [...prev, data]);
+            }
         });
 
         socketRef.current.on("error", (error: any) => {
-            console.error("❌ Socket 에러:", error);
+            console.error("소켓 에러:", error);
         });
 
         socketRef.current.on("disconnect", () => {
-            console.log("🔌 Socket 연결 해제");
+            console.log("소켓 연결 해제");
         });
     };
 
-    // 메시지 전송
     const sendMessage = async (message: string) => {
         if (!message.trim() || !userId || !productId || !user?._id) {
-            console.warn("⚠️ 메시지 전송 불가");
+            console.warn("메시지 전송 불가");
             return;
         }
-    
+
         setSending(true);
         try {
-            console.log("📤 send_message 발송:", {
+            console.log("send_message 발송:", {
                 senderId: user._id,
                 receiverId: userId,
                 productId,
@@ -108,7 +110,6 @@ export function useChat(userId: string | undefined, productId: string | undefine
         }
     };
 
-    // 정리
     useEffect(() => {
         loadMessages();
         initSocket();

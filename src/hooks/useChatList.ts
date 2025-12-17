@@ -25,7 +25,11 @@ export function useChatList() {
         try {
             const data = await api<{ ok: true; chats: ChatRoom[] }>("/chat/list");
             if (data.ok) {
-                setChatRooms(data.chats);
+                const validChats = data.chats.filter((chat) => {
+                    return chat.product && chat.product._id;
+                });
+                console.log("📥 채팅 목록 로드 완료:", validChats);
+                setChatRooms(validChats);
             }
         } catch (err) {
             console.error("채팅 목록 조회 실패:", err);

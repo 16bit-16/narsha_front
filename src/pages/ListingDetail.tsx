@@ -89,6 +89,11 @@ export default function ListingDetail() {
       return;
     }
 
+    if (product?.status === "sold") {
+      alert("판매완료된 상품입니다");
+      return;
+  }
+
     if (user?._id === product?.seller._id) {
       alert("본인 상품입니다");
       return;
