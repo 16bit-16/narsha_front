@@ -108,7 +108,7 @@ export default function Header() {
             <>
               <div
                 onClick={() => mydetail()} //
-                className="flex items-center justify-center px-2 duration-150 hover:cursor-pointer hover:font-semibold text-md"
+                className="flex items-center justify-center px-2 duration-150 cursor-pointer hover:font-semibold text-md"
               >
                 <div className="relative">
                   <img src="https://cdn-icons-png.flaticon.com/512/456/456283.png" alt="" className="w-4 h-4" />

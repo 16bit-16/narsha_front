@@ -17,12 +17,21 @@ export default function Chat() {
     const [product, setProduct] = useState<Product | null>(null);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         if (productId) {
             loadProduct();
         }
     }, [productId]);
+
+    useEffect(() => {
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
+
 
     const loadProduct = async () => {
         try {
@@ -99,20 +108,21 @@ export default function Chat() {
                         <img
                             src={product.images?.[0] || "/placeholder.png"}
                             alt={product.title}
-                            className="flex-shrink-0 object-cover w-12 h-12 bg-gray-200 rounded-lg"
+                            onClick={() => navigate(`/listing/${product._id}`)}
+                            className="flex-shrink-0 object-cover w-12 h-12 bg-gray-200 rounded-lg cursor-pointer"
                         />
                         <div className="flex flex-col justify-between min-w-0">
                             <p className="text-xl font-semibold text-gray-900">
                                 {Number(product.price).toLocaleString()}원
                             </p>
-                            <p className="text-xs font-semibold truncate text-zinc-500">{product.title}</p>
+                            <p className="text-xs font-semibold truncate cursor-pointer text-zinc-500" onClick={() => navigate(`/listing/${product._id}`)}>{product.title}</p>
                         </div>
                     </>
                 )}
             </div>
 
             {/* 메시지 영역 */}
-            <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+            <div ref={messagesContainerRef} className="flex-1 p-4 space-y-4 overflow-y-auto">
                 {messages.length === 0 ? (
                     <p className="text-center text-gray-500">메시지를 시작하세요</p>
                 ) : (
