@@ -100,7 +100,18 @@ export default function ProductNew() {
   const onPriceChange = (val: string) => {
     const digits = val.replace(/[^\d]/g, "");
     if (!digits) return setPriceRaw("");
-    setPriceRaw(digits.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+
+    // 최대 1억 원 제한
+    const numValue = parseInt(digits);
+    if (numValue > 100000000) {
+      alert("최대 1억 원까지만 등록 가능합니다.");
+      setPriceRaw("100000000".replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+      return;
+    }
+
+    // 컴마 추가
+    const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    setPriceRaw(formatted);
   };
 
   const addFiles = (files: File[]) => {
@@ -509,7 +520,7 @@ export default function ProductNew() {
                 disabled={aiLoading}
               />
               <p className="form-hint">
-                숫자만 입력하면 자동으로 3자리 콤마가 적용돼요.
+                최대 1억원까지 가능합니다.
               </p>
             </div>
 
