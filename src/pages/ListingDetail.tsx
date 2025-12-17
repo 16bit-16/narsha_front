@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";  // 추가
 import ImageCarousel from "../components/ImageCarousel";
 import DetailSidebar from "../components/DetailSidebar";
 import ProductSection from "../components/ProductSection";
@@ -12,6 +13,7 @@ import { api } from "../utils/api";
 export default function ListingDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();  // 추가
 
   const [product, setProduct] = useState<Product | null>(null);
   const [similar, setSimilar] = useState<Product[]>([]);
@@ -78,6 +80,21 @@ export default function ListingDetail() {
     } finally {
       setLikeBusy(false);
     }
+  };
+
+  const handleChat = () => {
+    if (!user) {
+      alert("로그인이 필요합니다");
+      navigate("/login");
+      return;
+    }
+
+    if (user?._id === product?.seller._id) {
+      alert("본인 상품입니다");
+      return;
+    }
+
+    navigate(`/chat/${product?.seller._id}/${product?._id}`);
   };
 
   if (loading) {
@@ -167,7 +184,7 @@ export default function ListingDetail() {
             </div>
             {product.lat && product.lng && (
               <>
-                <div className="relative grow">
+                <div className="relative hidden grow md:flex">
                   <button onClick={() => setShowMap(true)} className="absolute z-10 text-sm top-2 right-2 text-zinc-500">자세히 보기</button>
                   <Map
                     onSelect={() => { }}
@@ -193,8 +210,8 @@ export default function ListingDetail() {
                 ↗
               </button>
               <button
-                onClick={() => navigate(`/chat/${product.seller._id}/${product._id}`)}
-                className="w-full h-10 px-16 text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50">
+                onClick={handleChat}
+                className="items-center justify-center hidden w-full h-10 px-16 text-sm font-semibold border border-gray-800 rounded hover:bg-zinc-50 md:flex">
                 채팅하기
               </button>
             </div>
@@ -207,6 +224,12 @@ export default function ListingDetail() {
             ? product.description
             : "판매자가 설명을 입력하지 않았습니다."}
         </div>
+
+        <button
+          onClick={handleChat}
+          className="z-50 flex items-center justify-center w-full h-10 mt-3 text-sm font-semibold bg-white border border-gray-800 rounded hover:bg-zinc-50 md:hidden">
+          채팅하기
+        </button>
 
         <div className="mt-10">
           <ProductSection title="비슷한 상품" products={similar} />

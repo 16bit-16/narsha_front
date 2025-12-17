@@ -23,11 +23,20 @@ export default function MyPage() {
             navigate("/login");
             return;
         }
-
+    
         if (user) {
             loadData();
         }
     }, [user, authLoading, navigate]);
+    
+    // user 데이터 완전히 로드될 때까지 기다리기
+    useEffect(() => {
+        if (user?.profileImage) {
+            // 이미지 사전로드
+            const img = new Image();
+            img.src = user.profileImage;
+        }
+    }, [user?.profileImage]);
 
     const loadData = async () => {
         setLoading(true);

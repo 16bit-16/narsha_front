@@ -66,7 +66,7 @@ export default function MobileBottomNav() {
                         className={`flex flex-col items-center justify-center w-full h-full gap-1 ${isActive("/search") ? "text-black" : "text-gray-600"
                             }`}
                     >
-                        <img src="https://cdn-icons.flaticon.com/svg/19026/19026023.svg?token=exp=1765263630~hmac=b786739986359cafd9092920e2005904" alt="" className="size-4"/>
+                        <img src="https://cdn-icons-png.flaticon.com/512/54/54481.png" alt="" className="size-4"/>
                         <span className="text-xs font-semibold">검색</span>
                     </button>
 
@@ -92,7 +92,7 @@ export default function MobileBottomNav() {
                         className={`flex flex-col items-center justify-center w-full h-full gap-1 ${isActive("/chats") ? "text-black" : "text-gray-600"
                             }`}
                     >
-                        <img src="https://cdn-icons.flaticon.com/svg/18561/18561368.svg?token=exp=1765263767~hmac=3a717f432cc60cef66d876aef9188b4f" alt="" className="size-4"/>
+                        <img src="https://cdn-icons-png.flaticon.com/512/7708/7708974.png" alt="" className="size-4"/>
                         <span className="text-xs font-semibold">채팅</span>
                     </button>
 
