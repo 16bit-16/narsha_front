@@ -17,7 +17,7 @@ import Tos from "./pages/TOS";
 import Privacy from "./pages/PrivacyPolicy"
 import EditProfile from "./pages/EditProfile";
 import Category from "./pages/Category";
-import ChatList from "./pages/Chatlist";
+import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
 
 const HIDE_LAYOUT_PATHS = ["/login", "/signup", "/find"] as const;
