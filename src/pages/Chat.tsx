@@ -51,7 +51,7 @@ export default function Chat() {
     }
 
     return (
-        <div className="flex flex-col h-screen pb-20 bg-white md:pb-0">
+        <div className="flex flex-col h-screen bg-white md:pb-0">
             {/* 헤더 */}
             <div className="sticky top-0 flex gap-4 p-4 bg-white border-b">
                 <button onClick={() => navigate("/chats")} className="text-2xl">

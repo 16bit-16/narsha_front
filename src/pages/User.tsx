@@ -7,7 +7,7 @@ import type { Product } from "../data/mockProducts";
 
 export default function MyPage() {
     const navigate = useNavigate();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, logout } = useAuth();
 
     const [activeTab, setActiveTab] = useState<"selling" | "sold" | "likes">("selling");
     const [myProducts, setMyProducts] = useState<Product[]>([]);
@@ -218,7 +218,7 @@ export default function MyPage() {
 
                 {/* 탭 메뉴 */}
                 <div className="mb-4">
-                    <div className="flex gap-1 p-1 bg-white rounded-lg shadow-sm">
+                    <div className="flex gap-1 p-1 bg-white border rounded-lg">
                         <button
                             onClick={() => setActiveTab("selling")}
                             className={`flex-1 px-4 py-3 text-sm font-semibold rounded-md transition-all ${activeTab === "selling"
@@ -335,6 +335,12 @@ export default function MyPage() {
                     )}
                 </div>
             </div>
+            <button 
+                onClick={logout}
+                className="w-full py-3 mt-12 font-semibold text-red-500 transition-all border border-red-200 rounded-lg hover:border-red-300 hover:bg-red-100 bg-red-50"
+            >
+                로그아웃하기
+            </button>
         </div>
     );
 }
