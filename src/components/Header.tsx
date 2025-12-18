@@ -53,7 +53,7 @@ export default function Header() {
 
   return (
     <header className="top-0 z-10 bg-[#fcfcfc] border-b border-gray-200">
-      <div className="flex items-center max-w-6xl gap-3 px-4 py-3 mx-auto">
+      <div className="flex items-center justify-between max-w-6xl gap-3 px-4 py-3 mx-auto md:justify-normal">
         {/* 로고 */}
         <button
           onClick={() => navigate("/")}
@@ -77,6 +77,14 @@ export default function Header() {
           />
         </div>
 
+        {/* 모바일 검색버튼 */}
+        <button
+          onClick={() => navigate("/search")}
+          className="flex items-center justify-center md:hidden"
+          title="검색"
+        >
+          <img src="./search.svg" alt="" className="w-6 h-6" />
+        </button>
         {/* 우측 메뉴 */}
         <div className="items-center hidden gap-2 ml-auto md:flex">
 
@@ -145,8 +153,8 @@ export default function Header() {
         {[
           { to: "/", label: "추천" },
           { to: "/category", label: "카테고리" },
-          { to: "/feed/hot", label: "인기" },
-          { to: "/feed/new", label: "최신" },
+          { to: "/hot", label: "인기" },
+          { to: "/new", label: "최신" },
         ].map(({ to, label }) => (
           <NavLink
             key={to}

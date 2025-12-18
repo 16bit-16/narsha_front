@@ -70,7 +70,7 @@ export default function Category() {
 
             {/* 상품 섹션 */}
             <div className="px-4 py-6">
-                <h2 className="mb-4 text-lg font-bold">{selectedCategory}</h2>
+                <h2 className="mb-2 text-lg font-bold md:mb-4">{selectedCategory}</h2>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20">

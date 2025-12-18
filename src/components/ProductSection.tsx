@@ -10,7 +10,7 @@ export default function ProductSection({ title, products }: Props) {
   if (!products?.length) return null;
 
   return (
-    <section className="container p-0 my-8">
+    <section className="container p-0 my-4 md:my-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl section-title">{title}</h2>
         <button className="text-gray-500 text-md hover:text-black">

@@ -21,6 +21,8 @@ import EditProfile from "./pages/EditProfile";
 import Category from "./pages/Category";
 import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
+import New from "./pages/New";
+import Hot from "./pages/Hot";
 
 const HIDE_LAYOUT_PATHS = ["/login", "/signup", "/find", "/chat"] as const;
 
@@ -59,7 +61,8 @@ export default function App() {
             <Route path="/editprofile" element={<EditProfile />} />
             <Route path="/chats" element={<ChatList />} />
             <Route path="/chat/:userId/:productId" element={<Chat />} />
-
+            <Route path="/new" element={<New />} />
+            <Route path="/hot" element={<Hot />} />
 
             {/* 헤더 선택자 */}
             <Route path="/category" element={<Category />} />
