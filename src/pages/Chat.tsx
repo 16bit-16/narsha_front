@@ -7,18 +7,31 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../utils/api";
 import type { Product } from "../data/mockProducts";
 
+interface ContextMenu {
+    visible: boolean;
+    x: number;
+    y: number;
+    messageId: string | null;
+}
 
 export default function Chat() {
     const { userId, productId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { messages, loading, sending, sendMessage } = useChat(userId, productId);
+    const { messages, loading, sending, sendMessage, deleteMessage } = useChat(userId, productId);
     const [input, setInput] = useState("");
     const [product, setProduct] = useState<Product | null>(null);
     const [uploading, setUploading] = useState(false);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [contextMenu, setContextMenu] = useState<ContextMenu>({
+        visible: false,
+        x: 0,
+        y: 0,
+        messageId: null,
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-
 
     useEffect(() => {
         if (productId) {
@@ -31,7 +44,6 @@ export default function Chat() {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
     }, [messages]);
-
 
     const loadProduct = async () => {
         try {
@@ -46,39 +58,13 @@ export default function Chat() {
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setUploading(true);
-        try {
-            const token = sessionStorage.getItem("token");
-            const fd = new FormData();
-            fd.append("files", file);
-
-            const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
-            const res = await fetch(`${API_BASE}/uploads/images`, {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: fd,
-            });
-
-            const data = await res.json();
-            if (data.urls && data.urls[0]) {
-                await sendMessage("", data.urls[0]);
-            }
-        } catch (err) {
-            console.error("이미지 업로드 실패:", err);
-            alert("이미지 업로드 실패");
-        } finally {
-            setUploading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
-        }
+    const createPreview = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setPreviewImage(e.target?.result as string);
+            setSelectedFile(file);
+        };
+        reader.readAsDataURL(file);
     };
 
     const uploadImage = async (file: File) => {
@@ -101,6 +87,8 @@ export default function Chat() {
             const data = await res.json();
             if (data.urls && data.urls[0]) {
                 await sendMessage("", data.urls[0]);
+                setPreviewImage(null);
+                setSelectedFile(null);
             }
         } catch (err) {
             console.error("이미지 업로드 실패:", err);
@@ -113,6 +101,12 @@ export default function Chat() {
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        createPreview(file);
+    };
+
     const handlePaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
         const items = e.clipboardData?.items;
         if (!items) return;
@@ -122,19 +116,50 @@ export default function Chat() {
                 e.preventDefault();
                 const file = items[i].getAsFile();
                 if (file) {
-                    await uploadImage(file);
+                    createPreview(file);
                 }
                 break;
             }
         }
     };
 
+    const handleContextMenu = (e: React.MouseEvent, messageId: string, senderId: string) => {
+        e.preventDefault();
+        
+        if (senderId !== user?._id) {
+            return;
+        }
+
+        setContextMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY,
+            messageId,
+        });
+    };
+
+    const handleDeleteMessage = async () => {
+        if (contextMenu.messageId) {
+            if (window.confirm("메시지를 삭제하시겠습니까?")) {
+                await deleteMessage(contextMenu.messageId);
+            }
+        }
+        setContextMenu({ visible: false, x: 0, y: 0, messageId: null });
+    };
+
+    const closeContextMenu = () => {
+        setContextMenu({ visible: false, x: 0, y: 0, messageId: null });
+    };
+
     if (!user) {
-        return
+        return null;
     }
 
-
     const handleSend = async () => {
+        if (selectedFile) {
+            await uploadImage(selectedFile);
+            return;
+        }
         if (!input.trim()) return;
         await sendMessage(input);
         setInput("");
@@ -145,7 +170,7 @@ export default function Chat() {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-white md:pb-0">
+        <div className="flex flex-col h-screen bg-white md:pb-0" onClick={closeContextMenu}>
             {/* 헤더 */}
             <div className="sticky top-0 flex gap-4 p-4 bg-white border-b">
                 <button onClick={() => navigate("/chats")} className="text-2xl">
@@ -175,17 +200,16 @@ export default function Chat() {
                     <p className="text-center text-gray-500">메시지를 시작하세요</p>
                 ) : (
                     messages.map((msg) => {
-                        // sender/receiver 체크
                         if (!msg.sender || !msg.receiver) return null;
 
                         return (
                             <div
                                 key={msg._id}
-                                className={`flex ${msg.sender._id === user?._id ? "justify-end" : "justify-start"
-                                    }`}
+                                className={`flex ${msg.sender._id === user?._id ? "justify-end" : "justify-start"}`}
                             >
                                 <div
-                                    className={`max-w-xs px-3 py-3 rounded-lg ${msg.sender._id === user?._id
+                                    onContextMenu={(e) => handleContextMenu(e, msg._id, msg.sender._id)}
+                                    className={`max-w-xs px-3 py-3 rounded-lg cursor-pointer ${msg.sender._id === user?._id
                                         ? "bg-gray-700 text-white"
                                         : "bg-gray-200"
                                         }`}
@@ -213,25 +237,65 @@ export default function Chat() {
                 )}
             </div>
 
+            {/* 컨텍스트 메뉴 */}
+            {contextMenu.visible && (
+                <div
+                    className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg"
+                    style={{
+                        top: `${contextMenu.y}px`,
+                        left: `${contextMenu.x}px`,
+                    }}
+                >
+                    <button
+                        onClick={handleDeleteMessage}
+                        className="w-full px-4 py-2 text-left text-red-600 rounded-lg hover:bg-red-50"
+                    >
+                        삭제
+                    </button>
+                </div>
+            )}
+
+            {/* 이미지 미리보기 */}
+            {previewImage && (
+                <div className="px-4 py-2 border-t bg-gray-50">
+                    <div className="flex items-center justify-between">
+                        <img
+                            src={previewImage}
+                            alt="미리보기"
+                            className="object-cover h-16 rounded-lg"
+                        />
+                        <button
+                            onClick={() => {
+                                setPreviewImage(null);
+                                setSelectedFile(null);
+                            }}
+                            className="text-xl text-gray-500 hover:text-red-500"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* 입력 영역 */}
             <div className="sticky bottom-0 p-4 bg-white border-t">
                 <div className="flex gap-2">
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="p-4 text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                        disabled={uploading || previewImage !== null}
+                        className="p-2 text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50"
                     >
-                        <img className="size-4" src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="" />
+                        <img className="size-6" src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="" />
                     </button>
                     <input
                         type="text"
                         value={input}
-                        onPaste={handlePaste}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                        placeholder="메시지를 입력하세요"
+                        onPaste={handlePaste}
+                        placeholder={previewImage ? "사진을 전송하려면 전송 버튼을 클릭하세요" : "메시지를 입력하세요"}
                         className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        disabled={sending}
+                        disabled={sending || uploading || previewImage !== null}
                     />
                     <input
                         ref={fileInputRef}
@@ -242,10 +306,10 @@ export default function Chat() {
                     />
                     <button
                         onClick={handleSend}
-                        disabled={!input.trim() || sending}
+                        disabled={(!input.trim() && !selectedFile) || sending || uploading}
                         className="px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 disabled:opacity-50"
                     >
-                        {sending ? "전송 중..." : "전송"}
+                        {uploading ? "전송 중..." : "전송"}
                     </button>
                 </div>
             </div>

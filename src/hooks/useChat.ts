@@ -115,10 +115,23 @@ export function useChat(userId: string | undefined, productId: string | undefine
         };
     }, [userId, productId, user?._id]);
 
+    const deleteMessage = async (messageId: string) => {
+        try {
+            await api(`/chat/${messageId}`, {
+                method: "DELETE",
+            });
+            setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+        } catch (err) {
+            console.error("메시지 삭제 실패:", err);
+            alert("메시지 삭제에 실패했습니다");
+        }
+    };
+
     return {
         messages,
         loading,
         sending,
         sendMessage,
+        deleteMessage,
     };
 }
