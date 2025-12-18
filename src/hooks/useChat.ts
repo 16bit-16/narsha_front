@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../utils/api";
+import { sendNotification } from "../utils/notification";
 import io, { Socket } from "socket.io-client";
 
 interface Message {
@@ -60,6 +61,14 @@ export function useChat(userId: string | undefined, productId: string | undefine
         socketRef.current.on("receive_message", (data: Message) => {
             if (data.product === productId) {
                 setMessages((prev) => [...prev, data]);
+                
+                // 알림 발송
+                if (data.sender?.nickname) {
+                    sendNotification(`${data.sender.nickname}님의 메시지`, {
+                        body: data.message || "메시지를 보냈습니다",
+                        icon: data.sender.profileImage || "/logo_s.png",
+                    });
+                }
             }
         });
 
@@ -95,6 +104,7 @@ export function useChat(userId: string | undefined, productId: string | undefine
             setSending(false);
         }
     };
+    
 
     useEffect(() => {
         loadMessages();

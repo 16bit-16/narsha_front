@@ -81,6 +81,54 @@ export default function Chat() {
         }
     };
 
+    const uploadImage = async (file: File) => {
+        setUploading(true);
+        try {
+            const token = sessionStorage.getItem("token");
+            const fd = new FormData();
+            fd.append("files", file);
+
+            const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
+            const res = await fetch(`${API_BASE}/uploads/images`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: fd,
+            });
+
+            const data = await res.json();
+            if (data.urls && data.urls[0]) {
+                await sendMessage("", data.urls[0]);
+            }
+        } catch (err) {
+            console.error("이미지 업로드 실패:", err);
+            alert("이미지 업로드 실패");
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+    const handlePaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind === "file" && items[i].type.startsWith("image/")) {
+                e.preventDefault();
+                const file = items[i].getAsFile();
+                if (file) {
+                    await uploadImage(file);
+                }
+                break;
+            }
+        }
+    };
+
     if (!user) {
         return
     }
@@ -178,6 +226,7 @@ export default function Chat() {
                     <input
                         type="text"
                         value={input}
+                        onPaste={handlePaste}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === "Enter" && handleSend()}
                         placeholder="메시지를 입력하세요"

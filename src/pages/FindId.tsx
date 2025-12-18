@@ -9,10 +9,15 @@ export default function FindId() {
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [foundUserId, setFoundUserId] = useState("");
+    const [isHover, setIsHover] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [timer, setTimer] = useState(0);
+
+    const hovered = () => {
+        setIsHover(!isHover);
+    }
 
     // 인증코드 발송
     const handleSendCode = async (e: React.FormEvent) => {
@@ -77,24 +82,136 @@ export default function FindId() {
         return `${m}:${s.toString().padStart(2, "0")}`;
     };
 
+    //             {step === "email" && (
+    //                 <form onSubmit={handleSendCode} className="space-y-4">
+    //                     <div>
+    //                         <label className="block mb-2 text-sm font-semibold text-gray-700">
+    //                             이메일
+    //                         </label>
+    //                         <input
+    //                             type="email"
+    //                             value={email}
+    //                             onChange={(e) => setEmail(e.target.value)}
+    //                             placeholder="가입 시 사용한 이메일"
+    //                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none"
+    //                             required
+    //                         />
+    //                     </div>
+
+    //                     <button
+    //                         type="submit"
+    //                         disabled={loading}
+    //                         className="w-full py-3 text-white bg-gray-900 rounded-lg hover:opacity-90 disabled:opacity-50"
+    //                     >
+    //                         {loading ? "발송 중..." : "인증코드 발송"}
+    //                     </button>
+
+    //                     <button
+    //                         type="button"
+    //                         onClick={() => navigate("/login")}
+    //                         className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+    //                     >
+    //                         로그인으로 돌아가기
+    //                     </button>
+    //                 </form>
+    //             )}
+
+    //             {/* Step 2: 인증코드 입력 */}
+    //             {step === "verify" && (
+    //                 <form onSubmit={handleVerify} className="space-y-4">
+    //                     <div>
+    //                         <label className="block mb-2 text-sm font-semibold text-gray-700">
+    //                             인증코드
+    //                         </label>
+    //                         <input
+    //                             type="text"
+    //                             value={code}
+    //                             onChange={(e) => setCode(e.target.value)}
+    //                             placeholder="6자리 인증코드"
+    //                             maxLength={6}
+    //                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none"
+    //                             required
+    //                         />
+    //                         {timer > 0 && (
+    //                             <p className="mt-2 text-sm text-gray-600">
+    //                                 남은 시간: {formatTime(timer)}
+    //                             </p>
+    //                         )}
+    //                     </div>
+
+    //                     <button
+    //                         type="submit"
+    //                         disabled={loading || timer === 0}
+    //                         className="w-full py-3 text-white bg-gray-900 rounded-lg hover:opacity-90 disabled:opacity-50"
+    //                     >
+    //                         {loading ? "확인 중..." : "확인"}
+    //                     </button>
+
+    //                     <button
+    //                         type="button"
+    //                         onClick={() => setStep("email")}
+    //                         className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+    //                     >
+    //                         다시 시도
+    //                     </button>
+    //                 </form>
+    //             )}
+
+    //             {/* Step 3: 결과 */}
+    //             {step === "result" && (
+    //                 <div className="space-y-4 text-center">
+    //                     <div className="p-6 rounded-lg bg-gray-50">
+    //                         <p className="mb-2 text-sm text-gray-600">회원님의 아이디는</p>
+    //                         <p className="text-2xl font-bold text-gray-900">{foundUserId}</p>
+    //                     </div>
+
+    //                     <button
+    //                         onClick={() => navigate("/login")}
+    //                         className="w-full py-3 text-white bg-gray-900 rounded-lg hover:opacity-90"
+    //                     >
+    //                         로그인하기
+    //                     </button>
+
+    //                     <button
+    //                         onClick={() => navigate("/find/pw")}
+    //                         className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+    //                     >
+    //                         비밀번호 찾기
+    //                     </button>
+    //                 </div>
+    //             )}
+    //         </div>
+    //     </div>
+    // );
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-            <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-2xl">
-                <h1 className="mb-6 text-2xl font-bold text-center">아이디 찾기</h1>
+        <div className="flex items-center justify-center h-screen bg-gray-800 md:bg-gradient-to-b from-black to-gray-800">
+            <div className="flex flex-col justify-center items-center bg-[#fcfcfc] md:w-[30%] rounded-2xl  w-[100%] h-[98vh] space-y-4 p-4">
+                <a href="/" className="w-48">
+                    <img src="/logo_black.png" alt="" />
+                </a>
+                <div className="grid w-full max-w-sm grid-cols-[1fr,1fr] justify--center pb-2">
+                    <a href="/find/pw" className="space-y-2 text-lg text-center text-gray-400 transition-all duration-100 hover:text-gray-500 hover:font-semibold"
+                        onMouseEnter={() => hovered()}
+                        onMouseLeave={() => hovered()}>
+                        <p>비밀번호 찾기</p>
+                        <div className="w-full bg-gray-300 h-[2px]" style={{ backgroundColor: isHover ? "#6b7280" : "#d1d5db", height: isHover ? "3px" : "1px" }}></div>
+                    </a>
+                    <div className="space-y-2 text-lg font-semibold text-center cursor-pointer">
+                        <p>아이디 찾기</p>
+                        <div className="w-full bg-gray-800 h-[3px]"></div>
+                    </div>
+                </div>
 
                 {error && (
-                    <div className="p-3 mb-4 text-sm text-red-600 rounded-lg bg-red-50">
+                    <div className="p-3 text-sm text-red-600 rounded-lg bg-red-50">
                         {error}
                     </div>
                 )}
 
                 {/* Step 1: 이메일 입력 */}
                 {step === "email" && (
-                    <form onSubmit={handleSendCode} className="space-y-4">
+                    <form onSubmit={handleSendCode} className="w-full max-w-sm mx-auto space-y-4">
                         <div>
-                            <label className="block mb-2 text-sm font-semibold text-gray-700">
-                                이메일
-                            </label>
                             <input
                                 type="email"
                                 value={email}
@@ -108,35 +225,24 @@ export default function FindId() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 text-white bg-gray-900 rounded-lg hover:opacity-90 disabled:opacity-50"
+                            className="w-full py-2 font-semibold text-white bg-gray-800 rounded-md hover:opacity-90 disabled:opacity-50"
                         >
                             {loading ? "발송 중..." : "인증코드 발송"}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => navigate("/login")}
-                            className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                        >
-                            로그인으로 돌아가기
                         </button>
                     </form>
                 )}
 
                 {/* Step 2: 인증코드 입력 */}
                 {step === "verify" && (
-                    <form onSubmit={handleVerify} className="space-y-4">
+                    <form onSubmit={handleVerify} className="w-full max-w-sm mx-auto space-y-4">
                         <div>
-                            <label className="block mb-2 text-sm font-semibold text-gray-700">
-                                인증코드
-                            </label>
                             <input
                                 type="text"
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
                                 placeholder="6자리 인증코드"
                                 maxLength={6}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md placeholder:text-zinc-400 focus:outline-none focus:scale-103 focus:ring-1 focus:ring-zinc-400"
                                 required
                             />
                             {timer > 0 && (
@@ -148,8 +254,8 @@ export default function FindId() {
 
                         <button
                             type="submit"
-                            disabled={loading || timer === 0}
-                            className="w-full py-3 text-white bg-gray-900 rounded-lg hover:opacity-90 disabled:opacity-50"
+                            disabled={loading || timer === 0 || code.trim().length !== 6}
+                            className="w-full py-2 font-semibold text-white bg-gray-800 rounded-md hover:opacity-90 disabled:opacity-50"
                         >
                             {loading ? "확인 중..." : "확인"}
                         </button>
@@ -157,7 +263,7 @@ export default function FindId() {
                         <button
                             type="button"
                             onClick={() => setStep("email")}
-                            className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            className="w-full py-2 font-semibold border border-gray-300 rounded-md hover:opacity-90"
                         >
                             다시 시도
                         </button>
@@ -166,24 +272,16 @@ export default function FindId() {
 
                 {/* Step 3: 결과 */}
                 {step === "result" && (
-                    <div className="space-y-4 text-center">
+                    <div className="w-full max-w-sm space-y-4 text-center">
                         <div className="p-6 rounded-lg bg-gray-50">
                             <p className="mb-2 text-sm text-gray-600">회원님의 아이디는</p>
                             <p className="text-2xl font-bold text-gray-900">{foundUserId}</p>
                         </div>
-
                         <button
                             onClick={() => navigate("/login")}
                             className="w-full py-3 text-white bg-gray-900 rounded-lg hover:opacity-90"
                         >
                             로그인하기
-                        </button>
-
-                        <button
-                            onClick={() => navigate("/find/pw")}
-                            className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                        >
-                            비밀번호 찾기
                         </button>
                     </div>
                 )}

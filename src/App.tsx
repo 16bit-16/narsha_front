@@ -1,6 +1,8 @@
 // src/App.tsx
 import { AuthProvider } from "./context/AuthContext";
+import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { requestNotificationPermission } from "./utils/notification";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MobileMenu from "./components/MobileMenu";
@@ -16,7 +18,7 @@ import FindPw from "./pages/FindPw";
 import Tos from "./pages/TOS";
 import Privacy from "./pages/PrivacyPolicy"
 import EditProfile from "./pages/EditProfile";
-import Category from "./pages/Category";
+// import Category from "./pages/Category";
 import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
 
@@ -31,6 +33,9 @@ export default function App() {
   const hideLayout = shouldHideLayout(pathname);
   const mainClass = hideLayout ? "flex-1" : "p-2 md:container flex-1";
 
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
   return (
     <div className="flex flex-col min-h-screen">
       <AuthProvider>
@@ -57,7 +62,7 @@ export default function App() {
 
 
             {/* 헤더 선택자 */}
-            <Route path="/category" element={<Category />} />
+            {/* <Route path="/category" element={<Category />} /> */}
 
             {/* 인증 필요한 페이지 (예시) */}
             {/*

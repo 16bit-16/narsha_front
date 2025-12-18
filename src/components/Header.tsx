@@ -93,11 +93,11 @@ export default function Header() {
           <div className="w-[1px] h-4 bg-gray-800"></div>
           <button
             onClick={goChat}
-            className="flex items-center justify-center pr-2 duration-150 text-md hover:font-semibold"
+            className="flex items-center justify-center px-2 duration-150 text-md hover:font-semibold"
             title="채팅"
           >
             <div className="relative">
-              <img src="https://cdn-icons-png.flaticon.com/512/3737/3737822.png" alt="" className="w-4 h-4" />
+              <img src="https://cdn-icons-png.flaticon.com/512/7708/7708974.png" alt="" className="w-4 h-4" />
             </div>
             <p className="pl-1">채팅</p>
           </button>
