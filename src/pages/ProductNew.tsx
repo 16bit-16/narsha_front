@@ -441,7 +441,7 @@ export default function ProductNew() {
           {/* 디테일 사이드바 */}
           <div>
             <label className="form-label">상품 정보</label>
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-rows-1 gap-4 md:grid-cols-5">
               <div className="p-4 space-y-2 border rounded-lg">
                 <p>브랜드</p>
                 <hr />

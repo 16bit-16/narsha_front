@@ -487,7 +487,7 @@ export default function Signup() {
           )}
         </div>
         {/* 오른쪽 */}
-        <div className="bg-gradient-to-b from-black rounded-xl m-1 to-gray-800 w-[70%] items-center justify-center flex p-20 flex-row gap-5 hidden md:flex">
+        <div className="bg-gradient-to-b from-black rounded-xl m-1 to-gray-800 w-[70%] items-center justify-center p-20 flex-row gap-5 hidden md:flex">
           <div className="text-left">
             <p className="text-zinc-300 leading-tight text-[35px] md:text-[30px]">
               빠르고

@@ -279,37 +279,39 @@ export default function Chat() {
 
             {/* 입력 영역 */}
             <div className="sticky bottom-0 p-4 bg-white border-t">
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading || previewImage !== null}
-                        className="p-2 text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50"
-                    >
-                        <img className="size-6" src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="" />
-                    </button>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                        onPaste={handlePaste}
-                        placeholder={previewImage ? "사진을 전송하려면 전송 버튼을 클릭하세요" : "메시지를 입력하세요"}
-                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        disabled={sending || uploading || previewImage !== null}
-                    />
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                    />
+                <div className="flex items-center justify-between gap-2 p-2 border rounded-lg">
+                    <div className="flex">
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading || previewImage !== null}
+                            className="px-2 text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                        >
+                            <img className="size-4" src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="" />
+                        </button>
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                            onPaste={handlePaste}
+                            placeholder={previewImage ? "사진을 전송하려면 전송 버튼을 클릭하세요" : "메시지를 입력하세요"}
+                            className="flex pl-2 rounded-lg"
+                            disabled={sending || uploading || previewImage !== null}
+                        />
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                        />
+                    </div>
                     <button
                         onClick={handleSend}
                         disabled={(!input.trim() && !selectedFile) || sending || uploading}
-                        className="px-6 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 disabled:opacity-50"
+                        className="px-2 disabled:opacity-50"
                     >
-                        {uploading ? "전송 중..." : "전송"}
+                        <img className="size-4" src="https://cdn-icons-png.flaticon.com/512/786/786205.png" alt="" />
                     </button>
                 </div>
             </div>

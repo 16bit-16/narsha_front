@@ -18,7 +18,7 @@ import FindPw from "./pages/FindPw";
 import Tos from "./pages/TOS";
 import Privacy from "./pages/PrivacyPolicy"
 import EditProfile from "./pages/EditProfile";
-// import Category from "./pages/Category";
+import Category from "./pages/Category";
 import ChatList from "./pages/ChatList";
 import Chat from "./pages/Chat";
 
@@ -62,7 +62,7 @@ export default function App() {
 
 
             {/* 헤더 선택자 */}
-            {/* <Route path="/category" element={<Category />} /> */}
+            <Route path="/category" element={<Category />} />
 
             {/* 인증 필요한 페이지 (예시) */}
             {/*
