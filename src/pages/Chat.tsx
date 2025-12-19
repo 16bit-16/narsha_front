@@ -295,7 +295,7 @@ export default function Chat() {
                             onKeyPress={(e) => e.key === "Enter" && handleSend()}
                             onPaste={handlePaste}
                             placeholder={previewImage ? "사진을 전송하려면 전송 버튼을 클릭하세요" : "메시지를 입력하세요"}
-                            className="flex w-full pl-2 rounded-lg"
+                            className="flex w-full pl-2 rounded-lg focus:outline-none"
                             disabled={sending || uploading || previewImage !== null}
                         />
                         <input
