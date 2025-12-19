@@ -280,7 +280,7 @@ export default function Chat() {
             {/* 입력 영역 */}
             <div className="sticky bottom-0 p-4 bg-white border-t">
                 <div className="flex items-center justify-between gap-2 p-2 border rounded-lg">
-                    <div className="flex">
+                    <div className="flex w-full">
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploading || previewImage !== null}
