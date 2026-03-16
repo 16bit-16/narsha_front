@@ -19,7 +19,15 @@ export default function ProductSection({ title, products }: Props) {
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
         {products.map((p) => (
-          <ProductCard key={p._id} item={p} />
+          p._id?.startsWith("skeleton-") ? (
+            <div key={p._id} className="animate-pulse">
+              <div className="w-full h-40 mb-2 bg-gray-300 rounded-lg"></div>
+              <div className="w-3/4 h-4 mb-2 bg-gray-300 rounded"></div>
+              <div className="w-1/2 h-4 bg-gray-300 rounded"></div>
+            </div>
+          ) : (
+            <ProductCard key={p._id} item={p} />
+          )
         ))}
       </div>
     </section>

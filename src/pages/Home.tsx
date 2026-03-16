@@ -6,6 +6,27 @@ import type { Product } from "../data/mockProducts";
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string) || "/api";
 
+// 스켈레톤 데이터 생성
+const createSkeletonProducts = (count: number): Product[] =>
+  [...Array(count)].map((_, i) => ({
+    _id: `skeleton-${i}`,
+    title: "",
+    description: "",
+    price: 0,
+    category: "",
+    location: "",
+    images: [""],
+    status: "selling" as const,
+    createdAt: "",
+    seller: { _id: "", userId: "", nickname: "" },
+    brand: "",
+    quality: "중" as const,
+    buydate: "",
+    trade: "",
+    deliveryfee: "",
+    isSailed: false,
+  }));
+
 export default function Home() {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,20 +58,8 @@ export default function Home() {
     };
   }, []);
 
-  // 간단한 섹션 분리: 앞쪽 12개를 추천, 다음 12개를 인기 섹션에서 사용
-  const recommended = items.slice(0, 12);
-  const popular = items.slice(12, 24);
-
-  if (loading) {
-    return (
-      <>
-        <Banner />
-        <div className="container py-10 text-center text-gray-600">
-          불러오는 중...
-        </div>
-      </>
-    );
-  }
+  const recommended = loading ? createSkeletonProducts(12) : items.slice(0, 12);
+  const popular = loading ? createSkeletonProducts(12) : items.slice(12, 24);
 
   if (err) {
     return (
